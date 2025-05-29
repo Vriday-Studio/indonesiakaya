@@ -386,13 +386,14 @@ Jejakmu kini ada di Arundaya—negeri yang tumbuh dari kebaikan, cinta, dan hara
                        alt="Arrow Glow" 
                        className="w-full h-[30vh] object-cover mb-4" // Set height menjadi 30vh dan gunakan object-cover
                    />
-                   <p id="caramain" className="text-base text-white mb-8 justify-center mr-8 ml-8">
+                   <p id="caramain" className="text-sm text-white mb-8 justify-center mr-8 ml-8">
                  
 Pilih satu warga untuk mewakilimu.<br></br><br></br>
 
 Kamu diundang ke pernikahan Ratu Purbasari dan Raja Guru Minda!<br></br><br></br>
 
-Jelajahi istana dan jadilah bagian dari kisah mereka.
+Jelajahi istana dan jadilah bagian dari kisah mereka.<br></br><br></br>
+Mainkan juga permainan mencari harta karun, temukan benda-benda tersembunyi di sekitar istana untuk mendapatkan poin tambahan!
    </p>
    
                 
