@@ -121,6 +121,8 @@ const QRScanner = () => {
         stopCamera(); // Matikan kamera sebelum navigate
         navigate("/story-detail/empat-raja");
         return;
+      }else{
+        
       }
 
       let url;
@@ -132,8 +134,16 @@ const QRScanner = () => {
           navigate(data);
           return;
         } else {
-          setResult(data);
-          return;
+          // Tambahkan logika untuk memeriksa apakah data adalah URL
+          try {
+            new URL(data); // Jika ini berhasil, data adalah URL
+            stopCamera(); // Matikan kamera sebelum redirect
+            window.location.href = data; // Redirect ke URL
+            return;
+          } catch {
+            setResult(data);
+            return;
+          }
         }
       }
 
