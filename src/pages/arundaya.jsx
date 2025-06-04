@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import { initializeApp } from "firebase/app";
 import {firebaseConfig} from "../lib/firebase/firebase";
+
 import { getContentSettingByTag } from "../lib/firebase/contentSetting";
 import { useAuth } from "../context/AuthProvider";
 import { getSelectedUserPoints, updateUserPoints,getSelectedUserFinishArundaya,setFinishArundaya } from "../lib/firebase/users";
@@ -98,7 +99,7 @@ const Arundaya = () => {
        const point = await getSelectedUserPoints(user.id);
        setUserPoint(point);
    };
-   
+ 
    const getUserFinished = async () => {
     const pointx = await getSelectedUserFinishGame(user.id);
     setFinishUnparse(pointx);
@@ -172,6 +173,7 @@ const Arundaya = () => {
        // Kirim data ke Firebase
        try {
            TamuTrue(dataString);
+        //    updatemoveUser(0,0);
            console.log("Data berhasil dikirim:", dataString);
        } catch (error) {
            console.error("Error mengirim data ke Firebase:", error);
