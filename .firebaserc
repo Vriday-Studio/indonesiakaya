@@ -1,0 +1,24 @@
+{
+    "projects": {
+        "staging": "fubuki-ar-test",
+        "production": "arundaya-9fb69"
+    },
+    "targets": {
+        "fubuki-ar-test": {
+            "hosting": {
+                "staging": [
+                    "fubuki-ar-test"
+                ]
+            }
+        },
+        "arundaya-9fb69": {
+            "hosting": {
+                "production": [
+                    "indonesiakaya"
+                ]
+            }
+        }
+    },
+    "etags": {},
+    "dataconnectEmulatorConfig": {}
+}
