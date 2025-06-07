@@ -8,7 +8,7 @@ import {firebaseConfig} from "../lib/firebase/firebase";
 
 import { getContentSettingByTag } from "../lib/firebase/contentSetting";
 import { useAuth } from "../context/AuthProvider";
-import { getSelectedUserPoints, updateUserPoints,getSelectedUserFinishArundaya,setFinishArundaya } from "../lib/firebase/users";
+import { getSelectedUserPoints, updateUserPoints,getSelectedUserFinishArundaya,setFinishArundaya,setOnlineArundaya } from "../lib/firebase/users";
 import { TamuTrue} from "../lib/firebase/movexy";
 const Arundaya = () => {
    const { user, logoutUser } = useAuth();
@@ -173,6 +173,7 @@ const Arundaya = () => {
        // Kirim data ke Firebase
        try {
            TamuTrue(dataString);
+           setOnlineArundaya(user.id,true);
         //    updatemoveUser(0,0);
            console.log("Data berhasil dikirim:", dataString);
        } catch (error) {

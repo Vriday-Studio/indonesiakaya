@@ -110,7 +110,12 @@ const ProfileForm = () => {
     const onSubmit = async (data) => {
         try {
             const pointUser = user.points || 0;
-            await updateProfileUser(user.id, { ...data, birthdate: `${data.year}-${data.month}-${data.day}`, points: isEditing ? pointUser : pointUser + 80 });
+            const newPoints = isEditing ? pointUser : pointUser + 80;
+            await updateProfileUser(user.id, { 
+                ...data, 
+                birthdate: `${data.year}-${data.month}-${data.day}`, 
+                points: newPoints
+            });
             loginUser({
                 user: {
                     ...user,
@@ -118,7 +123,7 @@ const ProfileForm = () => {
                     Gender: data.gender,
                     Tanggal_Lahir: `${data.year}-${data.month}-${data.day}`,
                     Hp: data.phone,
-                    points: 80,
+                    points: newPoints,
                 },
             });
         } catch (error) {

@@ -124,6 +124,16 @@ export const setFinishArungi = async (userId, pernah) => {
         return false;
     }
 }
+export const setOnlineArundaya = async (userId, isOnline) => {
+    try {
+        const userRef = ref(database, `Users/${userId}/ismove`);
+        await set(userRef , isOnline);
+    
+    }catch (error) {
+        console.log("Error updating arungi user: ", error);
+        return false;
+    }
+}
 export const getSelectedUserFinishArungi = async (userId) => {
     const userRef = ref(database, `Users/${userId}/finishedArungi`);
     const snapshot = await get(userRef);

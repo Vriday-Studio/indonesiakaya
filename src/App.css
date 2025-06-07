@@ -9,7 +9,32 @@
 .tox-promotion-link {
   display: none !important;
 }
+.chat-button {
+  transition: background-color 0.1s ease; /* Animasi transisi */
+}
 
+.chat-button:active {
+  background-color: #fbbb83; /* Warna oranye tua saat tombol ditekan */
+}
+.scrollable {
+  overflow-y: auto; /* Mengaktifkan scroll vertikal */
+  scrollbar-width: thin; /* Untuk Firefox */
+  scrollbar-color: #ccc #333; /* Warna scrollbar dan background */
+}
+
+/* Untuk Webkit (Chrome, Safari) */
+.scrollable::-webkit-scrollbar {
+  width: 8px; /* Lebar scrollbar */
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background-color: #ccc; /* Warna scrollbar */
+  border-radius: 10px; /* Membuat sudut scrollbar melengkung */
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background: #333; /* Warna background scrollbar */
+}
 .show {
   position: absolute;
   width: 100%;

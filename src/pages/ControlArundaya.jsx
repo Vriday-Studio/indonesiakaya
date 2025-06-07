@@ -52,7 +52,7 @@ const ControlArundaya = () => {
   };
   const handleMove = (event) => {
     updatemoveUser(event.x, event.y);
-    resetIdleTimer(); // Reset timer saat ada gerakan
+//resetIdleTimer(); // Reset timer saat ada gerakan
   };
 
   const handleStop = () => {
@@ -69,18 +69,18 @@ const ControlArundaya = () => {
     setShowPopup(false); // Tutup pop-up
   };
 
-  const resetIdleTimer = () => {
-    clearTimeout(idleTimer); // Hapus timer sebelumnya
-    idleTimer = setTimeout(() => {
-      handleHome(); // Panggil handleHome setelah 1 menit idle
-    }, 60000); // 60000 ms = 1 menit
-  };
+ // const resetIdleTimer = () => {
+ //   clearTimeout(idleTimer); // Hapus timer sebelumnya
+  //  idleTimer = setTimeout(() => {
+    //  handleHome(); // Panggil handleHome setelah 1 menit idle
+   // }, 16000); // 160000 ms = 16 detik
+  //};
 
-  useEffect(() => {
+ /* useEffect(() => {
     // Menambahkan event listeners untuk mendeteksi aktivitas pengguna
-    window.addEventListener('mousemove', resetIdleTimer);
-    window.addEventListener('keydown', resetIdleTimer);
-    window.addEventListener('click', resetIdleTimer);
+ window.addEventListener('mousemove', resetIdleTimer);
+  //  window.addEventListener('keydown', resetIdleTimer);
+  //  window.addEventListener('click', resetIdleTimer);
 
     // Bersihkan event listeners saat komponen unmount
     return () => {
@@ -90,6 +90,17 @@ const ControlArundaya = () => {
       clearTimeout(idleTimer); // Hapus timer saat unmount
     };
   }, []);
+  */
+
+  const sendMessage = async (message) => {
+    if (!user?.id) return;
+    
+    // Kirim pesan ke Firebase
+    await set(ref(database, `Users/${user.id}/message`), message);
+    
+    // Set ismessage menjadi true
+    await set(ref(database, `Users/${user.id}/isMessage`), "true");
+  };
 
   return (
     <div className="h-screen w-full flex flex-col items-center justify-between bg-primary-darker p-0">
@@ -107,13 +118,40 @@ const ControlArundaya = () => {
             className="w-full h-auto object-cover"
           />
           </div>
-        <div className="absolute -top-5 left-0 w-full h-[25%] flex flex-col items-center justify-center">
+        <div className="absolute -top-5 left-0 w-full h-[25%] flex flex-col items-center justify-center text-center">
           <h1 className="text-3xl font-bold text-white mb-2">Tamu Istana</h1>
-          <p className="text-xl text-white">Temukan Benda</p>
+          <h3 className="text-white text-xl mb-2">Skor: </h3>
+          <h3 id="score" className="text-white text-xl">{score}/60</h3>
         </div>
-        <h1 className="text-white text-2xl mb-8 text-center">Skor: </h1>
-        <h1 id="score" className="text-yellow-500 text-6xl mb-2 text-center">{score}/60</h1>
+     
       </div>
+     
+      {/* Div untuk tombol chat custom dummy  <div className="text-white text-xl">Chat:</div>*/}
+      <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'none' }}> {/* Menambahkan kelas scrollable */}
+        {/* Contoh tombol chat dummy */}
+        
+        {[
+          "Apa kabar?",
+          "Kesana yuk!",
+          "Terima kasih!",
+          "Aku dapat item!",
+          "Bagaimana denganmu?",
+          "Ayo bermain lagi!",
+          "Selamat datang!",
+          "Semangat terus!",
+          "Jangan lupa istirahat!",
+          "Sampai jumpa!"
+        ].map((message, index) => (
+          <button 
+            key={index} 
+            className="chat-button bg-orange-500 text-white px-4 py-2 rounded m-2 w-1/2" 
+            onClick={() => sendMessage(message)} // Panggil sendMessage saat tombol diklik
+          >
+            {message}
+          </button>
+        ))}
+      </div>
+
       <div className="flex justify-center w-full mb-8">
         <Joystick
           size={200}
