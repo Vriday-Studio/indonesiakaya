@@ -184,13 +184,7 @@ const Arundaya = () => {
 if(user!=null) {
    
     const userId = user.id;
-    const isPernah= await getSelectedUserFinishArundaya(userId);  
-    if(!isPernah){
-        window.console.log("!ispernah");
-        updateUserPoints(userId, 40);
-          
-       setFinishArundaya(userId,true);
-    }
+   
        
     }
     navigate('/control-arundaya');

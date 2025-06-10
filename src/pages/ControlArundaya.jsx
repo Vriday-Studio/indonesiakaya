@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthProvider";
 import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
-
+import { updateUserPoints,setFinishArundaya,getFinishArundaya } from "../lib/firebase/users";
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -13,10 +13,18 @@ const ControlArundaya = () => {
   const [hasShownPopup, setHasShownPopup] = useState(false);
   let hasShownPopupx = false;
   let idleTimer; // Timer untuk idle
-
+  const cekfinisharundaya = async () => {
+    if (!user?.id) {
+        navigate('/login'); // Arahkan ke halaman login jika user.id null
+        return; // Keluar dari fungsi
+    }
+    hasShownPopupx = await getFinishArundaya(user.id);
+    window.console.log("hasShownPopupx=" + hasShownPopupx);
+  };
+  cekfinisharundaya();
   // Fungsi untuk mendapatkan skor dari database
   const getScore = async () => {
-    if (!user?.id) return;
+    if (!user?.id) ;
     const scoreRef = ref(database, `Users/${user.id}/skor`);
     const snapshot = await get(scoreRef); // Ambil snapshot dari database
     const value = snapshot.val();
@@ -26,6 +34,10 @@ const ControlArundaya = () => {
     if (value >= 60) {
       setScore(60); // Batasi skor maksimal menjadi 60
       if (!hasShownPopupx) {
+        updateUserPoints(user.id, 60);
+        setFinishArundaya(user.id, true);
+      
+       
         hasShownPopupx = true;
         setShowPopup(true);
       }
@@ -59,8 +71,10 @@ const ControlArundaya = () => {
     updatemoveUser(0, 0);
   };
 
-  const handleHome = () => {
+  const handleHome  = () => {
     updatemoveUser(0, 0);
+    
+    
     updateismoveUser("offline");
     navigate('/arundaya');
   };
@@ -99,7 +113,7 @@ const ControlArundaya = () => {
     await set(ref(database, `Users/${user.id}/message`), message);
     
     // Set ismessage menjadi true
-    await set(ref(database, `Users/${user.id}/isMessage`), "true");
+    await set(ref(database, `Users/${user.id}/ismessage`), true);
   };
 
   return (
@@ -125,21 +139,21 @@ const ControlArundaya = () => {
         </div>
      
       </div>
-     
+      <h3 className="text-white text-xl mb-2">Chat: </h3>
       {/* Div untuk tombol chat custom dummy  <div className="text-white text-xl">Chat:</div>*/}
-      <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'none' }}> {/* Menambahkan kelas scrollable */}
+      <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'block' }}> {/* Menambahkan kelas scrollable */}
         {/* Contoh tombol chat dummy */}
         
         {[
-          "Apa kabar?",
+          "Hai!",
           "Kesana yuk!",
           "Terima kasih!",
-          "Aku dapat item!",
-          "Bagaimana denganmu?",
-          "Ayo bermain lagi!",
+          "Aku dapat!",
+          "Ayo cari bersama!",
+          "Mana lagi ya?",
           "Selamat datang!",
           "Semangat terus!",
-          "Jangan lupa istirahat!",
+          "Aku duluan!",
           "Sampai jumpa!"
         ].map((message, index) => (
           <button 

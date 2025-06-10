@@ -26,7 +26,6 @@ const Joystix = () => {
     const [isEventActive, setIsEventActive] = useState(false);
     const [currentEvent, setCurrentEvent] = useState("");
     const [Koleksi, setCurrentKoleksi] = useState("");
-   // const [score, setScore] = useState(0);
     const [dialogImage, setDialogImage] = useState("/images/Totem.png");
     const [collectionCount, setCollectionCount] = useState(0);
     const [showOkButton, setShowOkButton] = useState(false);

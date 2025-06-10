@@ -7,7 +7,7 @@ import BackIcon from "../components/BackIcon";
 import bgAuth from "/images/bg-auth.png";
 import { FIREBASE_ERRORS_CODE } from "../lib/constant";
 import { useAuth } from "../context/AuthProvider";
-import { updateProfileUser } from "../lib/firebase/users";
+import { updateProfileUser,updateProfileUsernoscore,setIsAlreadySetProfil,getIsAlreadySetProfil } from "../lib/firebase/users";
 
 const schema = z.object({
     name: z.string().min(3, { message: "Nama harus lebih dari 3 karakter" }),
@@ -109,23 +109,47 @@ const ProfileForm = () => {
 
     const onSubmit = async (data) => {
         try {
-            const pointUser = user.points || 0;
-            const newPoints = isEditing ? pointUser : pointUser + 80;
-            await updateProfileUser(user.id, { 
-                ...data, 
-                birthdate: `${data.year}-${data.month}-${data.day}`, 
-                points: newPoints
-            });
-            loginUser({
-                user: {
-                    ...user,
-                    Nama: data.name,
-                    Gender: data.gender,
-                    Tanggal_Lahir: `${data.year}-${data.month}-${data.day}`,
-                    Hp: data.phone,
-                    points: newPoints,
-                },
-            });
+            const isAlreadySetProfil = await getIsAlreadySetProfil(user.id);
+            console.log("isAlreadySetProfil=", isAlreadySetProfil);
+            const pointUser = user.points;
+            console.log("pointUser=", pointUser);
+            let newPoints = pointUser;
+
+            if (!isAlreadySetProfil) {
+                newPoints = pointUser + 80;
+                await setIsAlreadySetProfil(user.id, true);
+                await updateProfileUser(user.id, { 
+                    ...data, 
+                    birthdate: `${data.year}-${data.month}-${data.day}`, 
+                    points: newPoints
+                });
+                loginUser({
+                    user: {
+                        ...user,
+                        Nama: data.name,
+                        Gender: data.gender,
+                        Tanggal_Lahir: `${data.year}-${data.month}-${data.day}`,
+                        Hp: data.phone,
+                        points: newPoints,
+                    },
+                });
+            }else{
+                await updateProfileUsernoscore(user.id, { 
+                    ...data, 
+                    birthdate: `${data.year}-${data.month}-${data.day}`
+                });
+                loginUser({
+                    user: {
+                        ...user,
+                        Nama: data.name,
+                        Gender: data.gender,
+                        Tanggal_Lahir: `${data.year}-${data.month}-${data.day}`,
+                        Hp: data.phone,
+                    },
+                });
+            }
+
+          
         } catch (error) {
             console.log("Submit Error:", error);
             const message = FIREBASE_ERRORS_CODE[error.code] || FIREBASE_ERRORS_CODE.default;
