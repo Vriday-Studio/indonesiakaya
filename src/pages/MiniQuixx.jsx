@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { getSelectedUserPoints,updateUserPoints, getSelectedUserFinishQuizLutung,setFinishQuizLutung, getSelectedUserFinishQuizRaja,setFinishQuizRaja, getMaxScoreQuizLutung, setMaxScoreQuizLutung, getMaxScoreQuizRaja, setMaxScoreQuizRaja } from "../lib/firebase/users"; // Tambahkan updateUserPoints
-const MiniQuiz = () => {
-    const { user, logoutUser } = useAuth();
+const MiniQuixx = () => {
     const navigate = useNavigate();
     const { quizType } = useParams(); // Get the quiz type from URL parameter
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -15,12 +12,7 @@ const MiniQuiz = () => {
     const [showOverlay, setShowOverlay] = useState(false);
     const [canClaim, setCanClaim] = React.useState(false);
 
-    useEffect(() => {
-        // Cek jika user adalah null
-        if (user === null) {
-            navigate('/login'); // Arahkan ke halaman login
-        }
-    }, [user, navigate]); // Tambahkan user dan navigate sebagai dependensi
+    
 
     // Lutung quiz questions
     const lutungQuestions = [
@@ -168,7 +160,7 @@ const MiniQuiz = () => {
                 'C. 6',
                 'D. 7'
             ],
-            correctAnswer: 'D. 7',
+            correctAnswer: 'd. 7',
             description: 'Raja dan Ratu menemukan 7 telur di hutan.'
         },
         {
@@ -202,7 +194,7 @@ const MiniQuiz = () => {
             image: '/images/story/Lutung16.webp',
             question: 'Siapa anak yang pandai bertani?',
             options: [
-                'A. Dohak',
+                'A. Dohar',
                 'B. War',
                 'C. Pintole',
                 'D. Betani'
@@ -226,7 +218,7 @@ const MiniQuiz = () => {
         {
             id: 6,
             image: '/images/story/Lutung18.webp',
-            question: 'Apa peran Dohak dalam keluarga?',
+            question: 'Apa peran Dohar dalam keluarga?',
             options: [
                 'A. Menjaga rumah',
                 'B. Menggembala ternak',
@@ -234,7 +226,7 @@ const MiniQuiz = () => {
                 'D. Memasak'
             ],
             correctAnswer: 'B. Menggembala ternak',
-            description: 'Peran Dohak dalam keluarga adalah menggembala ternak.'
+            description: 'Peran Dohar dalam keluarga adalah menggembala ternak.'
         },
         {
             id: 7,
@@ -314,41 +306,12 @@ const MiniQuiz = () => {
 
         }
     };
-    const handleFinishQuiz = async () => {
+    const handleFinishQuiz = () => {
         window.console.log("finish quiz="+ quizType);
-        const userId = user.id; 
-        setIsQuizFinished(true);
-        let isDapatPoin=false;
-        if( quizType === 'empat-raja'){
-            const isPernah= await getSelectedUserFinishQuizRaja(userId);  
-            isDapatPoin=isPernah;
-            setFinishQuizRaja(userId,true);
-
-            // Cek dan update skor tertinggi
-            const maxScore = await getMaxScoreQuizRaja(userId);
-            if (score > maxScore) {
-                await setMaxScoreQuizRaja(userId, score);
-                isDapatPoin=false;
-            }
-        }else{
-            const isPernah= await getSelectedUserFinishQuizLutung(userId);  
-            window.console.log("isPernah="+ isPernah);
-            isDapatPoin=isPernah;
-            setFinishQuizLutung(userId,true);
-
-            // Cek dan update skor tertinggi
-            const maxScore = await getMaxScoreQuizLutung(userId);
-            if (score > maxScore) {
-                await setMaxScoreQuizLutung(userId, score);
-                isDapatPoin=false;
-            }
-        }
-        window.console.log("isdap="+ isDapatPoin);
-      if (!isDapatPoin) {
-           // Ganti dengan ID pengguna yang sesuai
-            await updateUserPoints(userId, score); // Panggil fungsi untuk memperbarui poin
-          //  setHasEarnedPoints(true); // Tandai bahwa poin sudah ditambahkan
-      }
+    
+      
+    
+      
     };
     const handleRestartQuiz = () => {
         setCurrentQuestion(0);
@@ -476,4 +439,4 @@ const MiniQuiz = () => {
     );
 };
 
-export default MiniQuiz;
+export default MiniQuixx;

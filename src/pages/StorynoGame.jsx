@@ -212,8 +212,16 @@ const StorynoGame = () => {
             &gt;
           </button>
         </div>
+
         {/* Tombol ke Mainkan Game dan MiniQuiz - hanya tampil jika bukan empat-rajademo */}
-       
+         <div className="w-full flex justify-center mt-1">
+          <Link
+            to={isLutung ? "/mini-quixx/lutung" : "/mini-quixx/empat-raja"}
+            className="rounded-lg border-2 border-primary-orange bg-black text-primary-orange font-bold px-8 py-1.5 text-base shadow transition hover:bg-primary-orange hover:text-black"
+          >
+            Mulai Mini Quiz
+          </Link>
+        </div>
       </div>
         </div>
       </div>
