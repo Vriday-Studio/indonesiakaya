@@ -160,7 +160,7 @@ const MiniQuixx = () => {
                 'C. 6',
                 'D. 7'
             ],
-            correctAnswer: 'd. 7',
+            correctAnswer: 'D. 7',
             description: 'Raja dan Ratu menemukan 7 telur di hutan.'
         },
         {
@@ -307,6 +307,7 @@ const MiniQuixx = () => {
         }
     };
     const handleFinishQuiz = () => {
+        setIsQuizFinished(true);
         window.console.log("finish quiz="+ quizType);
     
       
