@@ -90,9 +90,9 @@ Tiap hari di penuhi dengan tarian dan tawa bersama keluarga.\n\n
 `,  `Setiap anak menunjukkan bakatnya sendiri:\n
 War, si sulung, rajin merawat ladang, menggali tanah dan menanam sayuran.\n
 Betani, cekatan dan gesit, berlatih memanah dan membantu berburu makanan.\n
-Dohak, tenang dan tangguh,menggembala kambing dan menjaga ternak keluarga.\n
+Dohar, tenang dan tangguh,menggembala kambing dan menjaga ternak keluarga.\n
 Mohamad, teliti dan kreatif, menenun atap dan membantu membangun rumah.\n
-Tintole, si bungsu, lembut dan penuh perhatian, selalu ada untuk ibu dan saudara-saudaranya.\n
+Pintole, si bungsu, lembut dan penuh perhatian, selalu ada untuk ibu dan saudara-saudaranya.\n
 Mereka berbeda, tapi selalu saling melengkapi.\n\n\n\n\n
 `,  `Saat anak-anak telah cukup besar,sang ayah memanggil keempat putranya ke halaman rumah. Ia membentangkan peta berisi pulau-pulau di lautan timur.\n
 "Ini semua akan menjadi milik kalian," katanya.\n
@@ -101,7 +101,7 @@ Mereka berbeda, tapi selalu saling melengkapi.\n\n\n\n\n
 Seluruh keluarga berkumpul di samping tempat tidurnya. Dengan suara lemah, ia menatap satu per satu anak-anaknya.\n
 "Jangan lupakan asal kalian," ucapnya pelan.\n
 Ketika ia berpulang, angin terasa hening… dan langit malam tampak lebih gelap dari biasanya.\n\n\n\n\n
-`,  `War, Betani, Dohak, dan Mohamad berlayar ke pulau mereka masing-masing.\n
+`,  `War, Betani, Dohar, dan Mohamad berlayar ke pulau mereka masing-masing.\n
 Di sana, mereka membangun, menjaga, dan memimpin dengan hati. Rakyat mencintai mereka. Pulau-pulau itu pun tumbuh damai di bawah perlindungan mereka.\n
 Bijaksana dan cakap dalam memimpin nama mereka tersohor dengan sebutan Raja Ampat.\n
 Empat saudara, empat pemimpin, satu warisan dari hutan dan langit.\n\n\n\n\n
