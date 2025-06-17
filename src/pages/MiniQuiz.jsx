@@ -202,7 +202,7 @@ const MiniQuiz = () => {
             image: '/images/story/Lutung16.webp',
             question: 'Siapa anak yang pandai bertani?',
             options: [
-                'A. Dohak',
+                'A. Dohar',
                 'B. War',
                 'C. Pintole',
                 'D. Betani'
@@ -226,7 +226,7 @@ const MiniQuiz = () => {
         {
             id: 6,
             image: '/images/story/Lutung18.webp',
-            question: 'Apa peran Dohak dalam keluarga?',
+            question: 'Apa peran Dohar dalam keluarga?',
             options: [
                 'A. Menjaga rumah',
                 'B. Menggembala ternak',
@@ -234,7 +234,7 @@ const MiniQuiz = () => {
                 'D. Memasak'
             ],
             correctAnswer: 'B. Menggembala ternak',
-            description: 'Peran Dohak dalam keluarga adalah menggembala ternak.'
+            description: 'Peran Dohar dalam keluarga adalah menggembala ternak.'
         },
         {
             id: 7,
