@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthProvider";
 import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
-import { updateUserPoints,setFinishArundaya,getFinishArundaya } from "../lib/firebase/users";
+import { setFinishArundaya,getFinishArundaya, setgameLutungPoint } from "../lib/firebase/users";
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,13 +28,14 @@ const ControlArundaya = () => {
     const scoreRef = ref(database, `Users/${user.id}/skor`);
     const snapshot = await get(scoreRef); // Ambil snapshot dari database
     const value = snapshot.val();
-    setScore(value !== null ? value : "0"); // Set skor menjadi 0 jika null
-
+    setScore(value !== null ? value : 0); // Set skor menjadi 0 jika null
+    await setgameLutungPoint(user.id, value);
     // Tampilkan pop-up jika skor lebih dari 60 dan pop-up belum ditampilkan
     if (value >= 60) {
       setScore(60); // Batasi skor maksimal menjadi 60
       if (!hasShownPopupx) {
-        updateUserPoints(user.id, 60);
+     //   updateUserPoints(user.id, 60);
+       
         setFinishArundaya(user.id, true);
       
        

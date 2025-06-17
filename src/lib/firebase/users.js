@@ -196,51 +196,64 @@ export const getSelectedUserFinishArundaya = async (userId) => {
 };
 export const getSelectedUserPoints = async (userId, withTotal = true) => {
    // const userRef = ref(database, `Users/${userId}/quiz/totalPoint`);
-    const userProfilePointRef = ref(database, `Users/${userId}/points`);
+    const userProfilePointRef = ref(database, `Users/${userId}/profilePoints`);
+    const userkuislutungPointRef = ref(database, `Users/${userId}/kuisLutungPoints`);
+    const userkuisraja4PointRef = ref(database, `Users/${userId}/kuisRaja4Points`);
+    const usergamelutungPointRef = ref(database, `Users/${userId}/gameLutungPoints`);
+    const usergameraja4PointRef = ref(database, `Users/${userId}/gameRaja4Points`);
     const userRedeeemCodeRef = ref(database, `Users/${userId}/redeemCode`);
   //  const quizRef = ref(database, `Quiz`);
     const snapshot = await get(userProfilePointRef);
     const userProfilePointSnapshot = await get(userProfilePointRef);
     if (snapshot.exists()) {
-        return snapshot.val();
-    }else{
-        return 600;
-    }
-   // const userRedeemCodeSnapshot = await get(userRedeeemCodeRef);
-   // const quizSnapshot = await get(quizRef);
-   // console.log(" snapshot: ",  snapshot.val());
-  //  const quizData = quizSnapshot.val();
+        const snapshotkuisLutung = await get(userkuislutungPointRef);
+        const snapshotkuisRaja4 = await get(userkuisraja4PointRef);
+        const snapshotgameLutung = await get(usergamelutungPointRef);
+        const snapshotgameRaja4 = await get(usergameraja4PointRef);
+        const totalPoint = snapshot.val() + snapshotkuisLutung.val() + snapshotkuisRaja4.val() + snapshotgameLutung.val() + snapshotgameRaja4.val();
+        return totalPoint;
 
-   /* const totalPointFromQuiz = quizData ? Object.values(quizData).reduce((acc, curr) => acc + Number(curr.totalPoint), 0) : 420;
-    if (snapshot.exists()) {
-       // if (userRedeemCodeSnapshot.exists()) {
-        //    return 0;
-       // }
-        const userQuiz = snapshot.val();
-        const userProfilePoint = userProfilePointSnapshot.val();
-        const totalPoint = Object.values(userQuiz).reduce((acc, curr) => acc + curr, 0);
-        console.log("withTotar: ", withTotal);
-        if (withTotal) {
-            return `${totalPoint + userProfilePoint} / ${totalPointFromQuiz + 80}`;
-        } else {
-            return totalPoint + userProfilePoint;
-        }
-    } else if (userProfilePointSnapshot.exists()) {
-        if (withTotal) {
-            return `${userProfilePointSnapshot.val()} / ${totalPointFromQuiz + 80}`;
-        } else {
-            return userProfilePointSnapshot.val();
-        }
     } else {
-        if (withTotal) {
-            return `0 / ${totalPointFromQuiz + 80}`;
-        } else {
-            return 0;
-        }
+        // Inisialisasi semua point references ke 0 jika tidak ada
+        await set(userProfilePointRef, 0);
+        await set(userkuislutungPointRef, 0);
+        await set(userkuisraja4PointRef, 0);
+        await set(usergamelutungPointRef, 0);
+        await set(usergameraja4PointRef, 0);
+        return 0;
     }
-        */
+ 
 };
-
+export const setprofilPoint= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/profilePoints`);
+    await set(userRef, point);
+}
+export const getkuisRaja4Point= async (userId) => {
+    const userRef = ref(database, `Users/${userId}/kuisRaja4Points`);
+    const snapshot = await get(userRef);
+    return snapshot.exists() ? snapshot.val() : 0;
+}
+export const getkuisLutungPoint= async (userId) => {
+    const userRef = ref(database, `Users/${userId}/kuisLutungPoints`);
+    const snapshot = await get(userRef);
+    return snapshot.exists() ? snapshot.val() : 0;
+}
+export const setkuisLutungPoint= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/kuisLutungPoints`);
+    await set(userRef, point);
+}
+export const setkuisRaja4Point= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/kuisRaja4Points`);
+    await set(userRef, point);
+}
+export const setgameLutungPoint= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/gameLutungPoints`);
+    await set(userRef, point);
+}
+export const setgameRaja4Point= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/gameRaja4Points`);
+    await set(userRef, point);
+}   
 export const getSelecterUserPointByQuizId = async (userId, quizId) => {
     const userRef = ref(database, `Users/${userId}/quiz/${quizId}`);
     const snapshot = await get(userRef);
@@ -311,7 +324,7 @@ export const updateProfileUser = async (userId, userData) => {
             Gender: userData.gender,
             Tanggal_Lahir: userData.birthdate,
             Hp: userData.phone,
-            points: userData.points,
+            profilepoints: userData.points,
             updatedAt,
         });
         return true;

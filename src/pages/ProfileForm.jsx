@@ -7,7 +7,7 @@ import BackIcon from "../components/BackIcon";
 import bgAuth from "/images/bg-auth.png";
 import { FIREBASE_ERRORS_CODE } from "../lib/constant";
 import { useAuth } from "../context/AuthProvider";
-import { updateProfileUser,updateProfileUsernoscore,setIsAlreadySetProfil,getIsAlreadySetProfil } from "../lib/firebase/users";
+import { updateProfileUser,updateProfileUsernoscore, setprofilPoint, setIsAlreadySetProfil,getIsAlreadySetProfil } from "../lib/firebase/users";
 
 const schema = z.object({
     name: z.string().min(3, { message: "Nama harus lebih dari 3 karakter" }),
@@ -111,12 +111,14 @@ const ProfileForm = () => {
         try {
             const isAlreadySetProfil = await getIsAlreadySetProfil(user.id);
             console.log("isAlreadySetProfil=", isAlreadySetProfil);
-            const pointUser = user.points;
-            console.log("pointUser=", pointUser);
-            let newPoints = pointUser;
 
+           // const pointUser = user.points;
+          //  console.log("pointUser=", pointUser);
+          //  let newPoints = pointUser;
+            setprofilPoint(user.id, 80);
             if (!isAlreadySetProfil) {
-                newPoints = pointUser + 80;
+               // newPoints = pointUser + 80;
+             
                 await setIsAlreadySetProfil(user.id, true);
                 await updateProfileUser(user.id, { 
                     ...data, 
@@ -130,7 +132,7 @@ const ProfileForm = () => {
                         Gender: data.gender,
                         Tanggal_Lahir: `${data.year}-${data.month}-${data.day}`,
                         Hp: data.phone,
-                        points: newPoints,
+                        profilepoints: 80,
                     },
                 });
             }else{

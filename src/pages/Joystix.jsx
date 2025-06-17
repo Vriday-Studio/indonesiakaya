@@ -10,7 +10,7 @@ import { Joystick } from 'react-joystick-component';
 import { updatemove, getIsEvent, getNamaEvent,getKoleksi,KoleksitoFalse, updatepersecond 
     ,onlineGender, KoleksiHitung, getJumlahkol,getLastItem,getGrupItem} from "../lib/firebase/movexy";
 import { chat } from "../lib/firebase/movexy";
-import { getSelectedUserPoints, updateUserPoints ,getSelectedUserFinishArungi,setFinishArungi} from "../lib/firebase/users";
+import { getSelectedUserPoints, updateUserPoints, setgameRaja4Point ,getSelectedUserFinishArungi,setFinishArungi} from "../lib/firebase/users";
 import { useAuth } from "../context/AuthProvider";
 const Joystix = () => {
     const { user, logoutUser } = useAuth();
@@ -431,11 +431,15 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
            
                 const isPernah= await getSelectedUserFinishArungi(userId);  
                 window.console.log("isPernah="+ isPernah);
-                isDapatPoin=isPernah;
+                //isDapatPoin=isPernah;
                 setFinishArungi(userId,true);
-            if(!isDapatPoin){
-                  await updateUserPoints(userId, 80); // Panggil fungsi untuk memperbarui poin
-            }
+           // if(!isDapatPoin){
+       //  const totalskorraja=   collectionCount * 10;
+        // if(totalskorraja>=70){
+        //    totalskorraja=80;
+      //   }
+                setgameRaja4Point(userId, 80); // Panggil fungsi untuk memperbarui poin
+          //  }
           //  setHasEarnedPoints(true); // Tandai bahwa poin sudah ditambahkan
        // }
     };

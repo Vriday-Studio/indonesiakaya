@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { getSelectedUserPoints,updateUserPoints, getSelectedUserFinishQuizLutung,setFinishQuizLutung, getSelectedUserFinishQuizRaja,setFinishQuizRaja, getMaxScoreQuizLutung, setMaxScoreQuizLutung, getMaxScoreQuizRaja, setMaxScoreQuizRaja } from "../lib/firebase/users"; // Tambahkan updateUserPoints
+import {setkuisRaja4Point,getkuisRaja4Point, setkuisLutungPoint, getkuisLutungPoint,setFinishQuizLutung,setFinishQuizRaja } from "../lib/firebase/users"; // Tambahkan updateUserPoints
 const MiniQuiz = () => {
     const { user, logoutUser } = useAuth();
     const navigate = useNavigate();
@@ -315,40 +315,30 @@ const MiniQuiz = () => {
         }
     };
     const handleFinishQuiz = async () => {
-        window.console.log("finish quiz="+ quizType);
+      
         const userId = user.id; 
         setIsQuizFinished(true);
-        let isDapatPoin=false;
-        if( quizType === 'empat-raja'){
-            const isPernah= await getSelectedUserFinishQuizRaja(userId);  
-            isDapatPoin=isPernah;
+        if( quizType === 'empat-raja'){ 
+            window.console.log("finish quiz="+ quizType);
             setFinishQuizRaja(userId,true);
-
-            // Cek dan update skor tertinggi
-            const maxScore = await getMaxScoreQuizRaja(userId);
-            if (score > maxScore) {
-                await setMaxScoreQuizRaja(userId, score);
-                isDapatPoin=false;
+            const skorBefore= await getkuisRaja4Point(userId);
+            if(skorBefore<score){
+            setkuisRaja4Point(userId, score);
             }
-        }else{
-            const isPernah= await getSelectedUserFinishQuizLutung(userId);  
-            window.console.log("isPernah="+ isPernah);
-            isDapatPoin=isPernah;
-            setFinishQuizLutung(userId,true);
-
             // Cek dan update skor tertinggi
-            const maxScore = await getMaxScoreQuizLutung(userId);
-            if (score > maxScore) {
-                await setMaxScoreQuizLutung(userId, score);
-                isDapatPoin=false;
+          
+        }else{
+            window.console.log("finish quiz="+ quizType);
+            setFinishQuizLutung(userId,true);
+            const skorBefore= await getkuisLutungPoint(userId);
+            window.console.log("skorBefore="+ skorBefore);
+            if(skorBefore<score){
+                window.console.log("setskor="+ score);
+            setkuisLutungPoint(userId, score);
             }
         }
-        window.console.log("isdap="+ isDapatPoin);
-      if (!isDapatPoin) {
-           // Ganti dengan ID pengguna yang sesuai
-            await updateUserPoints(userId, score); // Panggil fungsi untuk memperbarui poin
-          //  setHasEarnedPoints(true); // Tandai bahwa poin sudah ditambahkan
-      }
+     //   window.console.log("isdap="+ isDapatPoin);
+    
     };
     const handleRestartQuiz = () => {
         setCurrentQuestion(0);
