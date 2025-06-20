@@ -85,6 +85,19 @@ export const KoleksiHitung = async (gender) => {
      jumlahkol =parseInt(snapshot.val()) ;
   }
 }
+export const getonlineGender = async (gender) => {
+  let mg=gender;
+  var gen="Demo";
+  if(mg === "female"){
+    gen="Demo2";
+  }
+
+  const snapshot = await get(ref(database, `count/${gen}/isOnline`));
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }
+  return false;
+}
 export const onlineGender = async (gender, isOnline) => {
   let mg=gender;
   var gen="Demo";

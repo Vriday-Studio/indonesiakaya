@@ -7,7 +7,7 @@ import BackIcon from "../components/BackIcon";
 import { sanitizeDOM } from "../lib/sanitizeDOM";
 import LoadingScreen from "../components/LoadingScreen";
 import { Joystick } from 'react-joystick-component';
-import { updatemove, getIsEvent, getNamaEvent,getKoleksi,KoleksitoFalse, updatepersecond 
+import { updatemove, getIsEvent, getNamaEvent,getKoleksi,KoleksitoFalse, updatepersecond ,getonlineGender
     ,onlineGender, KoleksiHitung, getJumlahkol,getLastItem,getGrupItem} from "../lib/firebase/movexy";
 import { chat } from "../lib/firebase/movexy";
 import { getSelectedUserPoints, updateUserPoints, setgameRaja4Point ,getSelectedUserFinishArungi,setFinishArungi} from "../lib/firebase/users";
@@ -34,7 +34,11 @@ const Joystix = () => {
     const [grupItemGet, setGrupItem] = useState(1);
     const [showStory, setShowStory] = React.useState(false);
     const [isCompleteCollection, setIsCompleteCollection] = useState(false);
-  // const [lastItemArray,setLastArray] = useState(null);
+    const [isInactive, setIsInactive] = useState(false);
+    const [inactivityTimer, setInactivityTimer] = useState(null);
+    const [isMaleOnline, setIsMaleOnline] = useState(false);
+    const [isFemaleOnline, setIsFemaleOnline] = useState(false);
+    const [lastItemArray,setLastArray] = useState(null);
     const params = useParams();
     const tag = params.tag;
     const chatTemplates = [
@@ -67,7 +71,33 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
             </div>
         );
     }
+    const resetInactivityTimer = () => {
+        if (inactivityTimer) {
+            clearTimeout(inactivityTimer);
+        }
+        
+        const timer = setTimeout(() => {
+            setIsInactive(true);
+            onlineGender(gender, false);
+        }, 15000); // 15 seconds
+        
+        setInactivityTimer(timer);
+    };
+
+    useEffect(() => {
+        if (readygame) {
+            resetInactivityTimer();
+        }
+        
+        return () => {
+            if (inactivityTimer) {
+                clearTimeout(inactivityTimer);
+            }
+        };
+    }, [readygame]);
+
     const handleChatTemplate = async (message) => {
+        resetInactivityTimer();
         await chat(message, gender);
     };
 
@@ -82,6 +112,20 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
     }, [tag]);
 
    
+        const checkOnlineStatus = async () => {
+            const maleOnline = await getonlineGender("male");
+            const femaleOnline = await getonlineGender("female");
+            window.console.log("maleOnline="+maleOnline);
+            window.console.log("femaleOnline="+femaleOnline);
+            setIsMaleOnline(maleOnline);
+            setIsFemaleOnline(femaleOnline);
+        };
+
+        // Check initially
+        checkOnlineStatus();
+
+        
+     
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -128,8 +172,8 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
       //  renderQuestItems();
     }
     const handleMove = async (event) => {
+        resetInactivityTimer();
         await updatemove(event.x, event.y, gender);
-       
     }
 
     const typeWriter = (text) => {
@@ -294,6 +338,20 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         );
     };
 
+    if (isInactive) {
+        return (
+            <div className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker">
+                <div className="text-white text-2xl mb-8">Anda telah offline</div>
+                <button
+                    onClick={() => navigate('/Home2')}
+                    className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
+                >
+                    Keluar
+                </button>
+            </div>
+        );
+    }
+
     if (isLoading) {
         return (
             <LoadingScreen />
@@ -361,64 +419,88 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
     }
 
     if (readygame === null) {
+        if (isMaleOnline && isFemaleOnline) {
+            return (
+                <div className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker text-white">
+                    <div className="text-2xl mb-8 text-center px-4">
+                        Maaf, Permainan ini sedang penuh, silahkan coba beberapa saat lagi
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => navigate('/Home2')}
+                            className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
+                        >
+                            Keluar
+                        </button>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
+                        >
+                            Coba lagi
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div id="menugender" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-            <div id="bannertop" className="fixed top-0 left-0 w-full z-10">
-                <div className="relative">
-                    <button 
-                        onClick={() => handleBackmenu()}
-                        className="absolute top-4 left-4 z-20 w-10 h-10"
-                    >
+                <div id="bannertop" className="fixed top-0 left-0 w-full z-10">
+                    <div className="relative">
+                        <button 
+                            onClick={() => handleBackmenu()}
+                            className="absolute top-4 left-4 z-20 w-10 h-10"
+                        >
+                            <img 
+                                src="/images/back.png" 
+                                alt="Back" 
+                                className="w-full h-full object-contain"
+                            />
+                        </button>
                         <img 
-                            src="/images/back.png" 
-                            alt="Back" 
-                            className="w-full h-full object-contain"
+                            src="/images/banner4.png" 
+                            alt="Banner" 
+                            className="w-full h-[25vh] object-cover"
                         />
-                    </button>
-                    <img 
-                        src="/images/banner4.png" 
-                        alt="Banner" 
-                        className="w-full h-[25vh] object-cover"
-                    />
-                    <div id="isibaner" className="absolute inset-0 flex flex-col items-center justify-center">
-                        <h1 className="text-3xl font-bold text-white mb-2">Jejak Telur Ajaib</h1>
-                        <p className="text-xl text-white">Pilih Karakter Kamu</p>
+                        <div id="isibaner" className="absolute inset-0 flex flex-col items-center justify-center">
+                            <h1 className="text-3xl font-bold text-white mb-2">Jejak Telur Ajaib</h1>
+                            <p className="text-xl text-white">Pilih Karakter Kamu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-center gap-4 mt-[30vh]">
+                    <div className="flex flex-col items-center">
+                        <img 
+                            src="/images/rajax.png" 
+                            alt="Raja" 
+                            className={`w-64 h-64 object-contain mb-4 ${isMaleOnline ? 'opacity-50' : ''}`}
+                        />
+                        <button 
+                            className={`bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg ${isMaleOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={() => handleGenderSelect('male')}
+                            disabled={isMaleOnline}
+                        >
+                            Raja
+                        </button>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                        <img 
+                            src="/images/ratux.png" 
+                            alt="Ratu" 
+                            className={`w-64 h-64 object-contain mb-4 ${isFemaleOnline ? 'opacity-50' : ''}`}
+                        />
+                        <button 
+                            className={`bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg ${isFemaleOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={() => handleGenderSelect('female')}
+                            disabled={isFemaleOnline}
+                        >
+                            Ratu
+                        </button>
                     </div>
                 </div>
             </div>
-
-            <div className="flex justify-center gap-4 mt-[30vh]">
-                <div className="flex flex-col items-center">
-                    <img 
-                        src="/images/rajax.png" 
-                        alt="Raja" 
-                        className="w-64 h-64 object-contain mb-4"
-                    />
-                    <button 
-                        className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg"
-                        onClick={() => handleGenderSelect('male')}
-                    >
-                        Raja
-                    </button>
-                </div>
-
-                <div className="flex flex-col items-center">
-                    <img 
-                        src="/images/ratux.png" 
-                        alt="Ratu" 
-                        className="w-64 h-64 object-contain mb-4"
-                    />
-                    <button 
-                        className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg"
-                        onClick={() => handleGenderSelect('female')}
-                    >
-                        Ratu
-                    </button>
-                </div>
-            </div>
-
-           
-        </div>
         );
     }
     //const [iscompleted, setCompletefin] = React.useState(false);
@@ -500,6 +582,20 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
                     Kembali
                 </button>
             </div>
+            </div>
+        );
+    }
+  
+    if (isInactive && readygame) {
+        return (
+            <div className="fixed inset-0 bg-primary-darker flex flex-col items-center justify-center text-white">
+                <h1 className="text-3xl font-bold mb-8">Anda telah offline</h1>
+                <button 
+                    onClick={() => navigate('/Home2')}
+                    className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
+                >
+                    Keluar
+                </button>
             </div>
         );
     }

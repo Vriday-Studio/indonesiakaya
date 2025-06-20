@@ -176,7 +176,7 @@ const Home = () => {
             </div
             >*/}
             <footer className="text-center text-xs text-primary-orange mt-4">
-                v.0.5.2
+                v.0.5.3
             </footer>
         </div>
     );
