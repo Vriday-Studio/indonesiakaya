@@ -138,6 +138,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.hidden) {
+              //  setIsInactive(true);
                 updatemove(0, 0, gender); // Mengatur moveX dan moveY ke 0 saat tab tidak aktif
             }
         };
@@ -161,6 +162,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         KoleksiHitung(gender);  
         setCollectionCount(getJumlahkol());
         setLastItemGet(getLastItem());
+        
        // window.console.log('itemlastItemGet='+lastItemGet);
         setGrupItem(getGrupItem());
        // window.console.log('grupItemGet='+ grupItemGet); 
@@ -261,9 +263,9 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
 
     const handleLogout = () => {
         console.log("log klik");    
-        handleBackChoice();
+        onlineGender(gender,false);
         setTimeout(() => {
-            navigate('/Home2');
+            navigate('/story-detail/empat-raja');
         }, 2000);
     };
 
@@ -515,15 +517,9 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
                 window.console.log("isPernah="+ isPernah);
                 //isDapatPoin=isPernah;
                 setFinishArungi(userId,true);
-           // if(!isDapatPoin){
-       //  const totalskorraja=   collectionCount * 10;
-        // if(totalskorraja>=70){
-        //    totalskorraja=80;
-      //   }
-                setgameRaja4Point(userId, 80); // Panggil fungsi untuk memperbarui poin
-          //  }
-          //  setHasEarnedPoints(true); // Tandai bahwa poin sudah ditambahkan
-       // }
+         
+                setgameRaja4Point(userId, 60); // Panggil fungsi untuk memperbarui poin
+       
     };
     if (collectionCount >= 7 && !isCompleteCollection){
        
@@ -605,7 +601,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
                        <div id="bannertop" className="fixed top-0 left-0 w-full z-10">
                 <div className="relative">
                     <button 
-                        onClick={() => navigate('/story-detail/empat-raja')}
+                        onClick={() => handleLogout()}
                         className="absolute top-4 left-4 z-20 w-10 h-10"
                     >
                         <img 

@@ -54,10 +54,11 @@ export const updatemove = async (x,y,gender) => {
     if(mg === "female"){
       gen="Demo2";
     }
- 
+  
     // Update the value in Firebase database
     await set(ref(database, `count/${gen}/moveX`), mx);
     await set(ref(database, `count/${gen}/moveY`), my);
+    await onlineGender(mg, true);
     
 }
 export const KoleksitoFalse = async (gender) => {

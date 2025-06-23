@@ -29,7 +29,7 @@ const ControlArundaya = () => {
     const snapshot = await get(scoreRef); // Ambil snapshot dari database
     const value = snapshot.val();
     setScore(value !== null ? value : 0); // Set skor menjadi 0 jika null
-    await setgameLutungPoint(user.id, value);
+   
     // Tampilkan pop-up jika skor lebih dari 60 dan pop-up belum ditampilkan
     if (value >= 60) {
       setScore(60); // Batasi skor maksimal menjadi 60
@@ -43,6 +43,7 @@ const ControlArundaya = () => {
         setShowPopup(true);
       }
     }
+    await setgameLutungPoint(user.id, value);
   };
 
   useEffect(() => {
