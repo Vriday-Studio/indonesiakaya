@@ -79,7 +79,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         const timer = setTimeout(() => {
             setIsInactive(true);
             onlineGender(gender, false);
-        }, 15000); // 15 seconds
+        }, 150000); // 15 seconds
         
         setInactivityTimer(timer);
     };
