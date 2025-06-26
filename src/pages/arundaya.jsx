@@ -9,7 +9,7 @@ import {firebaseConfig} from "../lib/firebase/firebase";
 import { getContentSettingByTag } from "../lib/firebase/contentSetting";
 import { useAuth } from "../context/AuthProvider";
 import { getSelectedUserPoints, updateUserPoints,getSelectedUserFinishArundaya,setFinishArundaya,setOnlineArundaya } from "../lib/firebase/users";
-import { TamuTrue} from "../lib/firebase/movexy";
+import { TamuTrue,getJumlahUserTamu,setJumlahUserTamu} from "../lib/firebase/movexy";
 const Arundaya = () => {
    const { user, logoutUser } = useAuth();
    const navigate = useNavigate();
@@ -21,6 +21,8 @@ const Arundaya = () => {
    const [canClaim, setCanClaim] = React.useState(false);
    const [showStory, setShowStory] = React.useState(false);
    const [endChar, setEndChar] = React.useState(false);
+   const [jumlahTamu, setJumlahTamu] = React.useState(0);
+   const [isPenuhTamu, setIsPenuhTamu] = React.useState(false);
    const [selectedCharacter, setSelectedCharacter] = React.useState("images/arun/skin1/boy.png"); // State untuk karakter terpilih
    const [selectedOutfit, setSelectedOutfit] = React.useState(0); // State untuk menyimpan indeks baju terpilih
    const outfits = {
@@ -153,6 +155,14 @@ const Arundaya = () => {
        window.console.log("kliked "+ showStory);
    };
    const handleEndChar = async () => {
+
+        const jumlahTamuTemp = await getJumlahUserTamu();
+        setJumlahTamu(jumlahTamuTemp);
+        
+        if(jumlahTamuTemp <= 14){
+            setJumlahTamu(jumlahTamuTemp+1);
+            setJumlahUserTamu(jumlahTamuTemp+1);
+            setIsPenuhTamu(false);
        let characterName =  getCharacterFbName(selectedCharacter).toLowerCase(); // Ambil nama karakter dalam huruf kecil
        
        // Cek apakah characterName mengandung spasi
@@ -188,6 +198,9 @@ if(user!=null) {
        
     }
     navigate('/control-arundaya');
+    }else{
+        setIsPenuhTamu(true);
+    }
    };
    const handleContinueToGame = () => {
        navigate('/joystix');
@@ -241,6 +254,18 @@ const getbajuName = (outfit) => {
     const characterName = "Warna"; // Ambil nama karakter dan ubah menjadi huruf kecil
     return `${characterName}-${outfit + 1}`; // Mengembalikan nama karakter dan indeks outfit (indeks dimulai dari 0)
 };
+if (isPenuhTamu) {
+    return (
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker">
+            <h1 className="text-xl font-bold text-white mb-4 text-center">Maaf, <br></br> Tamu Istana sedang penuh,<br></br> Silahkan coba beberapa saat lagi</h1>
+            <br></br>
+            <div className="flex space-x-4">
+                <button onClick={() => window.location.reload()} className="bg-primary-orange text-white px-4 py-2 rounded">Coba Lagi</button>
+                <button onClick={handleHome} className="bg-red-500 text-white px-4 py-2 rounded">Keluar</button>
+            </div>
+        </div>
+    );
+}
    if (isLoading) {
        return <LoadingScreen />;
    }

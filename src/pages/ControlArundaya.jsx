@@ -4,12 +4,14 @@ import { useAuth } from "../context/AuthProvider";
 import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
+import {getJumlahUserTamu, setJumlahUserTamu} from "../lib/firebase/movexy";
 import { setFinishArundaya,getFinishArundaya, setgameLutungPoint } from "../lib/firebase/users";
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [score, setScore] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [showoffline, setShowoffline] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
   let hasShownPopupx = false;
   let idleTimer; // Timer untuk idle
@@ -60,8 +62,22 @@ const ControlArundaya = () => {
     await set(ref(database, `Users/${user.id}/moveX`), x);
     await set(ref(database, `Users/${user.id}/moveY`), y);
   };
+  const OfflineJumlahTamu = async () => {
+    if (!user?.id) return;
+    const jumlahTamu = await getJumlahUserTamu();
+    setJumlahUserTamu(jumlahTamu-1);
+    await set(ref(database, `Users/${user.id}/ismove`), "offline");
+    setShowoffline(true);
+
+  };
   const updateismoveUser = async (isonline) => {
     if (!user?.id) return;
+    if(isonline=="offline"){
+    const jumlahTamu = await getJumlahUserTamu();
+    if(showoffline==false){
+      setJumlahUserTamu(jumlahTamu-1);
+    }
+    }
     await set(ref(database, `Users/${user.id}/ismove`), isonline);
   };
   const handleMove = (event) => {
@@ -118,88 +134,116 @@ const ControlArundaya = () => {
     await set(ref(database, `Users/${user.id}/ismessage`), true);
   };
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') {
+            OfflineJumlahTamu(); // Panggil fungsi ketika tab tidak aktif
+        }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange); // Bersihkan event listener saat komponen unmount
+    };
+  }, []);
+
   return (
     <div className="h-screen w-full flex flex-col items-center justify-between bg-primary-darker p-0">
-      <div className="flex flex-col items-center w-full">
-        <button id="homebutton"
-          onClick={() => handleHome()}
-          className="absolute top-4 left-4 z-30 w-15 h-15 bg-transparent border-none"
-        >
-          <img src="/images/back.png" alt="Back" className="w-full h-full object-contain" />
-        </button>
-        <div className="relative w-full">
-          <img 
-            src="/images/banner4.png" 
-            alt="Banner" 
-            className="w-full h-auto object-cover"
-          />
-          </div>
-        <div className="absolute -top-5 left-0 w-full h-[25%] flex flex-col items-center justify-center text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Tamu Istana</h1>
-          <h3 className="text-white text-xl mb-2">Skor: </h3>
-          <h3 id="score" className="text-white text-xl">{score}/60</h3>
-        </div>
-     
-      </div>
-      <h3 className="text-white text-xl mb-2">Chat: </h3>
-      {/* Div untuk tombol chat custom dummy  <div className="text-white text-xl">Chat:</div>*/}
-      <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'block' }}> {/* Menambahkan kelas scrollable */}
-        {/* Contoh tombol chat dummy */}
-        
-        {[
-          "Hai!",
-          "Kesana yuk!",
-          "Terima kasih!",
-          "Aku dapat!",
-          "Ayo cari bersama!",
-          "Mana lagi ya?",
-          "Selamat datang!",
-          "Semangat terus!",
-          "Aku duluan!",
-          "Sampai jumpa!"
-        ].map((message, index) => (
-          <button 
-            key={index} 
-            className="chat-button bg-orange-500 text-white px-4 py-2 rounded m-2 w-1/2" 
-            onClick={() => sendMessage(message)} // Panggil sendMessage saat tombol diklik
-          >
-            {message}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex justify-center w-full mb-8">
-        <Joystick
-          size={200}
-          sticky={false}
-          baseColor="white"
-          stickColor="grey"
-          move={handleMove}
-          stop={handleStop}
-        />
-      </div>
-
-      {/* Pop-up untuk konfirmasi */}
-      {showPopup && (
-        <div className="fixed inset-0 flex justify-center bg-black bg-opacity-90 z-50">
-          <div className="bg-black p-5 rounded-lg text-center w-full h-full flex flex-col justify-center">
-            <div className="relative w-full">
-              <img 
-                src="/images/banner4.png" 
-                alt="Banner" 
-                className="w-full h-auto object-cover"
-              />
-              <h2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-white drop-shadow-lg">Selamat!</h2>
+        {showoffline ? (
+            <div className="h-full w-full flex flex-col items-center justify-center bg-primary-darker">
+                <h1 className="text-2xl font-bold text-white mb-4 text-center">Anda telah <br></br> meninggalkan permainan</h1>
+               <br></br>
+                <button 
+                    onClick={handleHome} 
+                    className="bg-red-500 text-white px-6 py-3 rounded"
+                >
+                    Keluar
+                </button>
             </div>
-            <p className="text-white mt-6">Anda sudah mendapatkan cukup item.</p>
-            <p className="text-white">Apakah Anda masih ingin bermain lagi?</p>
-            <div className="mt-4 flex flex-col space-y-5">
-              <button onClick={handleContinuePlaying} className="bg-green-500 text-white px-6 py-3 rounded w-full">Ya</button>
-              <button onClick={handleHome} className="bg-red-500 text-white px-6 py-3 rounded w-full">Tidak</button>
-            </div>
-          </div>
-        </div>
-      )}
+        ) : (
+            <>
+                <div className="flex flex-col items-center w-full">
+                    <button id="homebutton"
+                        onClick={() => handleHome()}
+                        className="absolute top-4 left-4 z-30 w-15 h-15 bg-transparent border-none"
+                    >
+                        <img src="/images/back.png" alt="Back" className="w-full h-full object-contain" />
+                    </button>
+                    <div className="relative w-full">
+                        <img 
+                            src="/images/banner4.png" 
+                            alt="Banner" 
+                            className="w-full h-auto object-cover"
+                        />
+                    </div>
+                    <div className="absolute -top-5 left-0 w-full h-[25%] flex flex-col items-center justify-center text-center">
+                        <h1 className="text-3xl font-bold text-white mb-2">Tamu Istana</h1>
+                        <h3 className="text-white text-xl mb-2">Skor: </h3>
+                        <h3 id="score" className="text-white text-xl">{score}/60</h3>
+                    </div>
+                </div>
+                <h3 className="text-white text-xl mb-2">Chat: </h3>
+                {/* Div untuk tombol chat custom dummy  <div className="text-white text-xl">Chat:</div>*/}
+                <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'block' }}> {/* Menambahkan kelas scrollable */}
+                    {/* Contoh tombol chat dummy */}
+                    
+                    {[
+                        "Hai!",
+                        "Kesana yuk!",
+                        "Terima kasih!",
+                        "Aku dapat!",
+                        "Ayo cari bersama!",
+                        "Mana lagi ya?",
+                        "Selamat datang!",
+                        "Semangat terus!",
+                        "Aku duluan!",
+                        "Sampai jumpa!"
+                    ].map((message, index) => (
+                        <button 
+                            key={index} 
+                            className="chat-button bg-orange-500 text-white px-4 py-2 rounded m-2 w-1/2" 
+                            onClick={() => sendMessage(message)} // Panggil sendMessage saat tombol diklik
+                        >
+                            {message}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex justify-center w-full mb-8">
+                    <Joystick
+                        size={200}
+                        sticky={false}
+                        baseColor="white"
+                        stickColor="grey"
+                        move={handleMove}
+                        stop={handleStop}
+                    />
+                </div>
+
+                {/* Pop-up untuk konfirmasi */}
+                {showPopup && (
+                    <div className="fixed inset-0 flex justify-center bg-black bg-opacity-90 z-50">
+                        <div className="bg-black p-5 rounded-lg text-center w-full h-full flex flex-col justify-center">
+                            <div className="relative w-full">
+                                <img 
+                                    src="/images/banner4.png" 
+                                    alt="Banner" 
+                                    className="w-full h-auto object-cover"
+                                />
+                                <h2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-white drop-shadow-lg">Selamat!</h2>
+                            </div>
+                            <p className="text-white mt-6">Anda sudah mendapatkan cukup item.</p>
+                            <p className="text-white">Apakah Anda masih ingin bermain lagi?</p>
+                            <div className="mt-4 flex flex-col space-y-5">
+                                <button onClick={handleContinuePlaying} className="bg-green-500 text-white px-6 py-3 rounded w-full">Ya</button>
+                                <button onClick={handleHome} className="bg-red-500 text-white px-6 py-3 rounded w-full">Tidak</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </>
+        )}
     </div>
   );
 };

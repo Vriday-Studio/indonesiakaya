@@ -25,6 +25,7 @@ const Joystix = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [isEventActive, setIsEventActive] = useState(false);
     const [currentEvent, setCurrentEvent] = useState("");
+    const [isInactive, setIsInactive] = useState(false);
     const [Koleksi, setCurrentKoleksi] = useState("");
     const [dialogImage, setDialogImage] = useState("/images/Totem.png");
     const [collectionCount, setCollectionCount] = useState(0);
@@ -34,8 +35,7 @@ const Joystix = () => {
     const [grupItemGet, setGrupItem] = useState(1);
     const [showStory, setShowStory] = React.useState(false);
     const [isCompleteCollection, setIsCompleteCollection] = useState(false);
-    const [isInactive, setIsInactive] = useState(false);
-    const [inactivityTimer, setInactivityTimer] = useState(null);
+
     const [isMaleOnline, setIsMaleOnline] = useState(false);
     const [isFemaleOnline, setIsFemaleOnline] = useState(false);
     const [lastItemArray,setLastArray] = useState(null);
@@ -71,33 +71,11 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
             </div>
         );
     }
-    const resetInactivityTimer = () => {
-        if (inactivityTimer) {
-            clearTimeout(inactivityTimer);
-        }
-        
-        const timer = setTimeout(() => {
-            setIsInactive(true);
-            onlineGender(gender, false);
-        }, 150000); // 15 seconds
-        
-        setInactivityTimer(timer);
-    };
-
-    useEffect(() => {
-        if (readygame) {
-            resetInactivityTimer();
-        }
-        
-        return () => {
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-            }
-        };
-    }, [readygame]);
+   
+    
 
     const handleChatTemplate = async (message) => {
-        resetInactivityTimer();
+        
         await chat(message, gender);
     };
 
@@ -115,8 +93,8 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         const checkOnlineStatus = async () => {
             const maleOnline = await getonlineGender("male");
             const femaleOnline = await getonlineGender("female");
-            window.console.log("maleOnline="+maleOnline);
-            window.console.log("femaleOnline="+femaleOnline);
+          //  window.console.log("maleOnline="+maleOnline);
+          //  window.console.log("femaleOnline="+femaleOnline);
             setIsMaleOnline(maleOnline);
             setIsFemaleOnline(femaleOnline);
         };
@@ -138,9 +116,10 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.hidden) {
-              //  setIsInactive(true);
-                updatemove(0, 0, gender); // Mengatur moveX dan moveY ke 0 saat tab tidak aktif
-            }
+                handleBackChoice();
+                setIsInactive(true);
+               // window.console.log("document.hidden"+isInactive);
+            } 
         };
 
         document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -148,7 +127,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         return () => {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
-    }, [gender]);
+    }, []);
     const handleStop = async (event) => {
         await updatemove(0, 0,gender);
     }
@@ -174,7 +153,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
       //  renderQuestItems();
     }
     const handleMove = async (event) => {
-        resetInactivityTimer();
+      
         await updatemove(event.x, event.y, gender);
     }
 
@@ -257,16 +236,15 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         image: "/images/Totem.png"
     };
 
-    const handleBackChoice = () => {
-        onlineGender(gender,false);
+    const handleBackChoice = async() => {
+        await onlineGender(gender,false);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async() => {
         console.log("log klik");    
-        onlineGender(gender,false);
-        setTimeout(() => {
+       await onlineGender(gender,false);
+       
             navigate('/story-detail/empat-raja');
-        }, 2000);
     };
 
     const questItems1 = [
@@ -297,6 +275,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         { name: "Telur Emas", collected: false }
     ];
     const handleBackmenu = () => {
+
         window.console.log("backmenu");
         navigate('/Home2');
     };
@@ -340,19 +319,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         );
     };
 
-    if (isInactive) {
-        return (
-            <div className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker">
-                <div className="text-white text-2xl mb-8">Anda telah offline</div>
-                <button
-                    onClick={() => navigate('/Home2')}
-                    className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
-                >
-                    Keluar
-                </button>
-            </div>
-        );
-    }
+   
 
     if (isLoading) {
         return (
@@ -582,12 +549,13 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
         );
     }
   
-    if (isInactive && readygame) {
+   
+   if (isInactive) {
         return (
-            <div className="fixed inset-0 bg-primary-darker flex flex-col items-center justify-center text-white">
-                <h1 className="text-3xl font-bold mb-8">Anda telah offline</h1>
-                <button 
-                    onClick={() => navigate('/Home2')}
+            <div id="menulefttab" className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker">
+                <div className="text-2xl font-bold text-white mb-4 text-center">Anda telah meninggalkan permainan</div>
+                <button
+                    onClick={() => handleLogout()}
                     className="bg-primary-orange text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-primary-orange/90 transition-colors"
                 >
                     Keluar
@@ -595,7 +563,6 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
             </div>
         );
     }
-  
     return (
         <div>
                        <div id="bannertop" className="fixed top-0 left-0 w-full z-10">
@@ -725,7 +692,10 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
             </div>
 
         </div>
+
+        
     );
+    
 };
 
 

@@ -74,6 +74,21 @@ export const TamuTrue = async (tamustr) => {
   
   await set(ref(database, `count/tamuistana`), gen);
 }
+export const setJumlahUserTamu = async (jumlah) => {
+  var gen= parseInt(jumlah);
+  
+  await set(ref(database, `count/jumlahtamu`), gen);
+}
+export const getJumlahUserTamu = async () => {
+  const jumlahRef = ref(database, `count/jumlahtamu`);
+  const snapshot = await get(jumlahRef);
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }else{
+    return 0;
+  }
+}
+
 export const KoleksiHitung = async (gender) => {
   let mg=gender;
   var gen="Demo";
