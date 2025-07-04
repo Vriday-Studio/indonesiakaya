@@ -132,13 +132,14 @@ const Home = () => {
                     <div className="col-span-2 border border-soft-cream bg-primary-darker text-soft-cream rounded-xl text-center p-4 text-xs flex flex-col items-center">
                         {user ? (
                             <>
-                                <p className="text-nowrap">Halo, {user.Nama}</p>
+                                <p className="text-wrap">Halo, {user.Nama}</p>
+                              
                                 <div className="flex gap-5">
                                     <button onClick={logoutUser} className="w-full my-2 underline underline-offset-4 text-nowrap w-webkit-max-content">
                                         Logout
                                     </button>
                                 </div>
-
+                                <p className="text-xs">Id: [ {user.id} ]</p>
                                 <Link id="pointx" to="/profile" className="text-xs pb-2 mt-2 w-3/4 text-center">
                                     Poin: {userPoint}
                                 </Link>
@@ -176,7 +177,7 @@ const Home = () => {
             </div
             >*/}
             <footer className="text-center text-xs text-primary-orange mt-4">
-                v.0.5.4
+                v.0.5.5
             </footer>
         </div>
     );

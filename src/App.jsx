@@ -45,7 +45,7 @@ import Arundaya from "./pages/arundaya";
 import ControlArundaya from "./pages/ControlArundaya";
 import StorynoGame from "./pages/StorynoGame";
 import MiniQuixx from "./pages/MiniQuixx";
-
+import AdminPage from "./pages/AdminPage";
 function App() {
     const [isLandscape, setIsLandscape] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -136,6 +136,7 @@ function App() {
                 <Route path="/mini-quixx/:quizType" element={<MiniQuixx />} />
                 <Route path="/control-arundaya" element={<ControlArundaya />} />
                 <Route path="/storynogame/:cerita" element={<StorynoGame />} />
+                <Route path="/adminpage" element={<AdminPage />} />
             </Route>
             <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
