@@ -80,8 +80,8 @@ Dan kisah mereka dikenang…\nsebagai bukti bahwa kebaikan akan selalu pulang se
 const empatRaja = [
   `Di sebuah desa kecil yang damai, hidup sepasang raja dan ratu yang bijaksana. Hidup mereka penuh kasih, tapi satu hal masih belum mereka miliki, seorang anak.\n
   Setiap hari mereka berdoa, berharap, menanti. Hingga suatu pagi, mereka pergi ke hutan untuk mencari kayu.\n
-  Namun yang mereka temukan bukanlah kayu, melainkan enam telur misterius, bercahaya lembut di balik semak-semak.\n\n\n\n\n
-`,  `Beberapa waktu setelah dibawa pulang, lima dari enam telur perlahan mulai retak.\n
+  Namun yang mereka temukan bukanlah kayu, melainkan tujuh telur misterius, bercahaya lembut di balik semak-semak.\n\n\n\n\n
+`,  `Beberapa waktu setelah dibawa pulang, lima dari tujuh telur perlahan mulai retak.\n
 Dari dalamnya, lahir empat bayi laki-laki dan satu perempuan yang sehat, pintar dan lucu, mengisi hati sang raja dan ratu.\n
 Satu telur yang tersisa utuh tetap disimpan sebagai tanda, bahwa keajaiban belum selesai.\n\n
 `,  `Tahun-tahun berlalu dengan cepat.\n
