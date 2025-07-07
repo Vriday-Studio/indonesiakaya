@@ -70,7 +70,11 @@ const Claim = () => {
         <div className="h-screen flex flex-col items-center gap-10 relative z-20 bg-primary-dark">
             <BackIcon className="absolute left-2 top-2 z-10" iconColor="white" />
             <div className="relative flex flex-col justify-center items-center gap-1 px-5 w-full bg-primary-orange/80 h-1/5">
+                
                 <h1 className="text-xl font-bold text-white">Penukaran Poin</h1>
+                <p className="text-lg text-white">Nama: {user.Nama}</p>
+                <p className="text-lg text-white">ID: {user.id}</p>
+                
                 {!userRedeemCode && <div className="bg-cream text-primary-brass rounded-2xl py-1 px-10 mt-2 font-bold pb-2">{userPoint}</div>}
                 <img src={bgAuth} alt="bg-auth" className="absolute w-4/5 h-full py-2" />
             </div>
