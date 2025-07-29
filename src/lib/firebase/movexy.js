@@ -74,6 +74,11 @@ export const TamuTrue = async (tamustr) => {
   
   await set(ref(database, `count/tamuistana`), gen);
 }
+export const Raja4True = async (tamustr) => {
+  var gen=tamustr;
+  
+  await set(ref(database, `count/statusraja4`), gen);
+}
 export const setJumlahUserTamu = async (jumlah) => {
   var gen= parseInt(jumlah);
   
