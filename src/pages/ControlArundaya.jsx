@@ -5,7 +5,7 @@ import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
 import {getJumlahUserTamu, setJumlahUserTamu} from "../lib/firebase/movexy";
-import { setFinishArundaya,getFinishArundaya, setgameLutungPoint } from "../lib/firebase/users";
+import { setFinishArundaya,getFinishArundaya, setgameLutungPoint,setSkorLutungPoint } from "../lib/firebase/users";
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -14,15 +14,29 @@ const ControlArundaya = () => {
   const [showoffline, setShowoffline] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
   let hasShownPopupx = false;
+  
+ // const [begingame, setBegingame] = useState(false);
   let idleTimer; // Timer untuk idle
   const cekfinisharundaya = async () => {
     if (!user?.id) {
         navigate('/login'); // Arahkan ke halaman login jika user.id null
         return; // Keluar dari fungsi
+    }else{
+     // if(!begingame){
+      //  console.log("begingame=" + begingame);
+   //   await setSkorLutungPoint(user.id, 0);
+      // await setSkorLutungPoint(user.id, 0);
+    // setBegingame(true);
+ //   }
     }
-    hasShownPopupx = await getFinishArundaya(user.id);
-    window.console.log("hasShownPopupx=" + hasShownPopupx);
+   
+   //hasShownPopupx = await getFinishArundaya(user.id);
+   // window.console.log("hasShownPopupx=" + hasShownPopupx);
   };
+  const resetGameSkor = async () => {
+    await setSkorLutungPoint(user.id, 0);
+    await setgameLutungPoint(user.id, 0);
+  }
   cekfinisharundaya();
   // Fungsi untuk mendapatkan skor dari database
   const getScore = async () => {
@@ -30,11 +44,13 @@ const ControlArundaya = () => {
     const scoreRef = ref(database, `Users/${user.id}/skor`);
     const snapshot = await get(scoreRef); // Ambil snapshot dari database
     const value = snapshot.val();
+ //   console.log("value=" + value);
     setScore(value !== null ? value : 0); // Set skor menjadi 0 jika null
    
     // Tampilkan pop-up jika skor lebih dari 60 dan pop-up belum ditampilkan
     if (value >= 60) {
       setScore(60); // Batasi skor maksimal menjadi 60
+    //  console.log("skor is >=60, hasShownPopupx=" + hasShownPopupx);
       if (!hasShownPopupx) {
      //   updateUserPoints(user.id, 60);
        
@@ -47,10 +63,13 @@ const ControlArundaya = () => {
     }
     await setgameLutungPoint(user.id, value);
   };
-
+hasShownPopupx = false;
   useEffect(() => {
     const interval = setInterval(() => {
-      getScore(); // Panggil fungsi getScore setiap 1 detik
+    //  if(begingame){
+        getScore(); // Panggil fungsi getScore setiap 1 detik
+     // }
+ 
     }, 1000);
 
     return () => clearInterval(interval); // Bersihkan interval saat komponen unmount
@@ -99,6 +118,7 @@ const ControlArundaya = () => {
 
   const handleContinuePlaying = () => {
     setShowPopup(false); // Tutup pop-up
+    resetGameSkor();
   };
 
  // const resetIdleTimer = () => {
@@ -137,7 +157,7 @@ const ControlArundaya = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
         if (document.visibilityState === 'hidden') {
-            OfflineJumlahTamu(); // Panggil fungsi ketika tab tidak aktif
+           OfflineJumlahTamu(); // Panggil fungsi ketika tab tidak aktif
         }
     };
 
@@ -231,7 +251,7 @@ const ControlArundaya = () => {
                                     alt="Banner" 
                                     className="w-full h-auto object-cover"
                                 />
-                                <h2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-white drop-shadow-lg">Selamat!</h2>
+                                <h2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-white drop-shadow-lg">Selesai!</h2>
                             </div>
                             <p className="text-white mt-6">Anda sudah mendapatkan cukup item.</p>
                             <p className="text-white">Apakah Anda masih ingin bermain lagi?</p>

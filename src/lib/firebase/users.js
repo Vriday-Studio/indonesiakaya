@@ -250,6 +250,10 @@ export const setgameLutungPoint= async (userId, point) => {
     const userRef = ref(database, `Users/${userId}/gameLutungPoints`);
     await set(userRef, point);
 }
+export const setSkorLutungPoint= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/skor`);
+    await set(userRef, point);
+}
 export const setgameRaja4Point= async (userId, point) => {
     const userRef = ref(database, `Users/${userId}/gameRaja4Points`);
     await set(userRef, point);
