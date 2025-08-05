@@ -44,7 +44,7 @@ const AdminPage = () => {
         // Tambahkan logika reset di sini jika diperlukan
         switch (resetType) {
             case "Reset Arungi":
-                console.log("Reset Arundaya All");
+                console.log("Reset Arungi All");
                Raja4True("reset");
                 break;
             case "Reset Arundaya All":

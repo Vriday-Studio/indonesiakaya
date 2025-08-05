@@ -36,8 +36,8 @@ const Joystix = () => {
     const [showStory, setShowStory] = React.useState(false);
     const [isCompleteCollection, setIsCompleteCollection] = useState(false);
 
-    const [isMaleOnline, setIsMaleOnline] = useState(false);
-    const [isFemaleOnline, setIsFemaleOnline] = useState(false);
+    const [isMaleOnline, setIsMaleOnline] = useState("false");
+    const [isFemaleOnline, setIsFemaleOnline] = useState("false");
     const [lastItemArray,setLastArray] = useState(null);
     const params = useParams();
     const tag = params.tag;
@@ -388,7 +388,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
     }
 
     if (readygame === null) {
-        if (isMaleOnline && isFemaleOnline) {
+        if ((isMaleOnline==="true") && (isFemaleOnline==="true" )) {
             return (
                 <div className="h-screen w-full flex flex-col items-center justify-center bg-primary-darker text-white">
                     <div className="text-2xl mb-8 text-center px-4">
@@ -448,7 +448,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
                         <button 
                             className={`bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg ${isMaleOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={() => handleGenderSelect('male')}
-                            disabled={isMaleOnline}
+                            disabled={isMaleOnline === "true"}
                         >
                             Raja
                         </button>
@@ -463,7 +463,7 @@ Suatu pagi, mereka memutuskan pergi ke hutan untuk mencari kayu bakar…<br></br
                         <button 
                             className={`bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-full transform transition-all duration-200 active:scale-95 w-40 text-2xl shadow-lg ${isFemaleOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={() => handleGenderSelect('female')}
-                            disabled={isFemaleOnline}
+                            disabled={isFemaleOnline === "true"}
                         >
                             Ratu
                         </button>
