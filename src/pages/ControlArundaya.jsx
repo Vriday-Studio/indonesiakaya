@@ -5,11 +5,12 @@ import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
 import {getJumlahUserTamu, setJumlahUserTamu} from "../lib/firebase/movexy";
-import { setFinishArundaya,getFinishArundaya, setgameLutungPoint,setSkorLutungPoint } from "../lib/firebase/users";
+import { setFinishArundaya,getFinishArundaya, getgameLutungPoint, setgameLutungPoint,setSkorLutungPoint } from "../lib/firebase/users";
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [score, setScore] = useState(0);
+ // const [hasmaxscore, sethasmaxScore] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showoffline, setShowoffline] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
@@ -34,21 +35,50 @@ const ControlArundaya = () => {
    // window.console.log("hasShownPopupx=" + hasShownPopupx);
   };
   const resetGameSkor = async () => {
-    await setSkorLutungPoint(user.id, 0);
-    await setgameLutungPoint(user.id, 0);
+   // await setSkorLutungPoint(user.id, 0);
+  //  await setgameLutungPoint(user.id, 0);
   }
   cekfinisharundaya();
   // Fungsi untuk mendapatkan skor dari database
   const getScore = async () => {
     if (!user?.id) ;
+    const scoreRefG = ref(database, `Users/${user.id}/gameLutungPoints`);
+    const snapshotG = await get(scoreRefG); // Ambil snapshot dari database
+    const valueG = snapshotG.val();
+    if(valueG === null){
+      setSkorLutungPoint(user.id,0);
+      setgameLutungPoint(user.id,0);
+      setScore(0);
+    }else
+      if(valueG >=60){
+      setSkorLutungPoint(user.id,60);
+      setScore(60); // Batasi skor maksimal menjadi 60
+      //  console.log("skor is >=60, hasShownPopupx=" + hasShownPopupx);
+   
+       //   updateUserPoints(user.id, 60);
+       if (!hasShownPopupx) {
+          setFinishArundaya(user.id, true);
+        
+         
+          hasShownPopupx = true;
+          setShowPopup(true);
+        
+       }
+      }
+      else
+      {
+    
     const scoreRef = ref(database, `Users/${user.id}/skor`);
     const snapshot = await get(scoreRef); // Ambil snapshot dari database
     const value = snapshot.val();
  //   console.log("value=" + value);
-    setScore(value !== null ? value : 0); // Set skor menjadi 0 jika null
+  //  setScore(value !== null ? value : 0); // Set skor menjadi 0 jika null
    
     // Tampilkan pop-up jika skor lebih dari 60 dan pop-up belum ditampilkan
     if (value >= 60) {
+     // sethasmaxScore(true);
+   // console.log("sethasmaxscore="+hasmaxscore);
+
       setScore(60); // Batasi skor maksimal menjadi 60
     //  console.log("skor is >=60, hasShownPopupx=" + hasShownPopupx);
       if (!hasShownPopupx) {
@@ -60,8 +90,17 @@ const ControlArundaya = () => {
         hasShownPopupx = true;
         setShowPopup(true);
       }
+    }else if (!hasShownPopupx) {
+      
+      setScore(value);
     }
-    await setgameLutungPoint(user.id, value);
+  //  console.log("hasShownPopupx="+hasShownPopupx);
+    if(!hasShownPopupx){
+    //  console.log("tulis game="+value);
+      await setgameLutungPoint(user.id, value);
+    }
+  }
+    
   };
 hasShownPopupx = false;
   useEffect(() => {

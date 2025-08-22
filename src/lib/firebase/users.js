@@ -268,7 +268,16 @@ export const getSelecterUserPointByQuizId = async (userId, quizId) => {
         return 0;
     }
 };
+export const getgameLutungPoint= async (userId, point) => {
+    const userRef = ref(database, `Users/${userId}/gameLutungPoints`);
+    const snapshot = await get(userRef);
 
+    if (snapshot.exists()) {
+        return snapshot.val();
+    } else {
+        return 0;
+    }
+}
 export const updateSelectedUser = async (userId, userData) => {
     try {
         const userRef = ref(database, `Users/${userId}`);
