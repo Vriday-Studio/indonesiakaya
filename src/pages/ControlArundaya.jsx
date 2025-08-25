@@ -52,14 +52,15 @@ const ControlArundaya = () => {
     }else
       if(valueG >=60){
       setSkorLutungPoint(user.id,60);
+      setgameLutungPoint(user.id,60);
       setScore(60); // Batasi skor maksimal menjadi 60
       //  console.log("skor is >=60, hasShownPopupx=" + hasShownPopupx);
    
        //   updateUserPoints(user.id, 60);
        if (!hasShownPopupx) {
           setFinishArundaya(user.id, true);
-        
-         
+          setSkorLutungPoint(user.id,60);
+          setgameLutungPoint(user.id,60);
           hasShownPopupx = true;
           setShowPopup(true);
         
@@ -78,7 +79,8 @@ const ControlArundaya = () => {
     if (value >= 60) {
      // sethasmaxScore(true);
    // console.log("sethasmaxscore="+hasmaxscore);
-
+     setSkorLutungPoint(user.id,60);
+     setgameLutungPoint(user.id,60);
       setScore(60); // Batasi skor maksimal menjadi 60
     //  console.log("skor is >=60, hasShownPopupx=" + hasShownPopupx);
       if (!hasShownPopupx) {
