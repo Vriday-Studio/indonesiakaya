@@ -16,6 +16,8 @@ const AdminPage = () => {
     const [userId, setUserId] = useState("");
     const [userData, setUserData] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
+    const [isFixing, setIsFixing] = useState(false);
+    const [fixStatus, setFixStatus] = useState("");
     const params = useParams();
     const [isButtonPressed, setIsButtonPressed] = useState(false);
     const [isButtonPressed2, setIsButtonPressed2] = useState(false);
@@ -55,6 +57,48 @@ const AdminPage = () => {
                 console.log("Reset Arundaya"); 
                 TamuTrue("false_boy_1_ResetOnly_1");
                 break;
+        }
+    };
+    
+    // Perbaiki key Users/undefined menjadi lastId + 1
+    const fixUndefinedUserId = async () => {
+        setIsFixing(true);
+        setFixStatus("");
+        try {
+            const usersRef = ref(database, `Users`);
+            const snapshot = await get(usersRef);
+            if (!snapshot.exists()) {
+                setFixStatus("Data Users tidak ditemukan.");
+                setIsFixing(false);
+                return;
+            }
+
+            const users = snapshot.val();
+            const keys = Object.keys(users);
+            if (!keys.includes("undefined")) {
+                setFixStatus("Tidak ada key 'undefined' pada Users.");
+                setIsFixing(false);
+                return;
+            }
+
+            const numericKeys = keys
+                .filter((k) => /^\d+$/.test(k))
+                .map((k) => parseInt(k, 10));
+            const lastId = numericKeys.length ? Math.max(...numericKeys) : 0;
+            const newId = String(lastId + 1);
+
+            // Gunakan multi-path update untuk memindahkan data dan menghapus 'undefined'
+            const payload = {};
+            payload[`Users/${newId}`] = users["undefined"];
+            payload[`Users/undefined`] = null; // hapus
+
+            await update(ref(database), payload);
+            setFixStatus(`Berhasil mengganti 'undefined' menjadi ${newId}.`);
+        } catch (error) {
+            console.error("Error fixing undefined user id:", error);
+            setFixStatus("Gagal mengganti ID. Lihat konsol untuk detail.");
+        } finally {
+            setIsFixing(false);
         }
     };
     // Fungsi untuk mengganti nilai null atau NaN dengan 0
@@ -125,6 +169,19 @@ const AdminPage = () => {
                 >
                     Cari
                 </button>
+
+                <div className="mt-6 flex items-center gap-3">
+                    <button 
+                        onClick={fixUndefinedUserId}
+                        className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded ${isFixing ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        disabled={isFixing}
+                    >
+                        {isFixing ? 'Memproses...' : "Perbaiki ID 'undefined'"}
+                    </button>
+                    {fixStatus && (
+                        <span className="text-white">{fixStatus}</span>
+                    )}
+                </div>
 
                 {isSearching && <div className="mt-4 text-white">Mencari data...</div>}
 
