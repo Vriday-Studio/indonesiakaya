@@ -19,6 +19,7 @@ const ControlArundaya = () => {
   // Refs untuk menghindari re-render yang tidak perlu
   const hasShownPopupRef = useRef(false);
   const intervalRef = useRef(null);
+  const offlineTimeoutRef = useRef(null);
   // Fungsi untuk memeriksa status finish arundaya
   const checkFinishArundaya = useCallback(async () => {
     if (!user?.id) {
@@ -100,8 +101,17 @@ const ControlArundaya = () => {
           
           // Update gameLutungPoints dengan skor terbaru
           await setgameLutungPoint(user.id, currentScore);
+          
+          // Pastikan field 'skor' juga di-update untuk konsistensi
+          // Jika skorValue >= 60, pastikan field 'skor' juga 60 (untuk memastikan konsistensi)
+          if (skorValue >= 60) {
+            await setSkorLutungPoint(user.id, 60);
+          }
         } else {
+          // Jika skorValue null, gunakan gameLutungPoints dan update field 'skor' juga
           currentScore = gameLutungPoints;
+          // Update field 'skor' dengan gameLutungPoints untuk sinkronisasi
+          await setSkorLutungPoint(user.id, gameLutungPoints);
         }
       }
       
@@ -135,15 +145,31 @@ const ControlArundaya = () => {
   const updateMoveUser = useCallback(async (x, y) => {
     if (!user?.id) return;
     
+    // Cek status ismove sebelum update posisi
     try {
-      await Promise.all([
-        set(ref(database, `Users/${user.id}/moveX`), x),
-        set(ref(database, `Users/${user.id}/moveY`), y)
-      ]);
+      const ismoveRef = ref(database, `Users/${user.id}/ismove`);
+      const ismoveSnapshot = await get(ismoveRef);
+      const ismoveValue = ismoveSnapshot.val();
+      
+      // Hanya update posisi jika user masih online (bukan offline)
+      if (ismoveValue !== "offline" && !showoffline) {
+        await Promise.all([
+          set(ref(database, `Users/${user.id}/moveX`), x),
+          set(ref(database, `Users/${user.id}/moveY`), y)
+        ]);
+      }
     } catch (error) {
       console.error('Error updating user position:', error);
     }
-  }, [user?.id]);
+  }, [user?.id, showoffline]);
+
+  // Fungsi untuk cancel timeout offline
+  const cancelOfflineTimeout = useCallback(() => {
+    if (offlineTimeoutRef.current) {
+      clearTimeout(offlineTimeoutRef.current);
+      offlineTimeoutRef.current = null;
+    }
+  }, []);
 
   // Fungsi untuk handle offline user
   const handleOfflineUser = useCallback(async () => {
@@ -152,7 +178,12 @@ const ControlArundaya = () => {
     try {
       const jumlahTamu = await getJumlahUserTamu();
       await setJumlahUserTamu(jumlahTamu - 1);
-      await set(ref(database, `Users/${user.id}/ismove`), "offline");
+      // Reset posisi ke 0 dan set status offline
+      await Promise.all([
+        set(ref(database, `Users/${user.id}/ismove`), "offline"),
+        set(ref(database, `Users/${user.id}/moveX`), 0),
+        set(ref(database, `Users/${user.id}/moveY`), 0)
+      ]);
       setShowoffline(true);
     } catch (error) {
       console.error('Error handling offline user:', error);
@@ -169,27 +200,37 @@ const ControlArundaya = () => {
         if (!showoffline) {
           await setJumlahUserTamu(jumlahTamu - 1);
         }
+        // Reset posisi ke 0 saat menjadi offline
+        await Promise.all([
+          set(ref(database, `Users/${user.id}/ismove`), isOnline),
+          set(ref(database, `Users/${user.id}/moveX`), 0),
+          set(ref(database, `Users/${user.id}/moveY`), 0)
+        ]);
+      } else {
+        await set(ref(database, `Users/${user.id}/ismove`), isOnline);
       }
-      await set(ref(database, `Users/${user.id}/ismove`), isOnline);
     } catch (error) {
       console.error('Error updating user move status:', error);
     }
   }, [user?.id, showoffline]);
   // Event handlers untuk joystick
   const handleMove = useCallback((event) => {
+    cancelOfflineTimeout();
     updateMoveUser(event.x, event.y);
-  }, [updateMoveUser]);
+  }, [updateMoveUser, cancelOfflineTimeout]);
 
   const handleStop = useCallback(() => {
+    cancelOfflineTimeout();
     updateMoveUser(0, 0);
-  }, [updateMoveUser]);
+  }, [updateMoveUser, cancelOfflineTimeout]);
 
   // Handler untuk kembali ke home
   const handleHome = useCallback(() => {
+    cancelOfflineTimeout();
     updateMoveUser(0, 0);
     updateIsMoveUser("offline");
     navigate('/arundaya');
-  }, [updateMoveUser, updateIsMoveUser, navigate]);
+  }, [updateMoveUser, updateIsMoveUser, navigate, cancelOfflineTimeout]);
 
   // Handler untuk melanjutkan permainan
   const handleContinuePlaying = useCallback(() => {
@@ -201,6 +242,8 @@ const ControlArundaya = () => {
   const sendMessage = useCallback(async (message) => {
     if (!user?.id) return;
     
+    cancelOfflineTimeout();
+    
     try {
       await Promise.all([
         set(ref(database, `Users/${user.id}/message`), message),
@@ -209,13 +252,23 @@ const ControlArundaya = () => {
     } catch (error) {
       console.error('Error sending message:', error);
     }
-  }, [user?.id]);
+  }, [user?.id, cancelOfflineTimeout]);
 
   // Effect untuk handle visibility change
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        handleOfflineUser();
+        // Cancel timeout yang sudah ada jika ada
+        cancelOfflineTimeout();
+        
+        // Set timeout 5 detik sebelum eksekusi handleOfflineUser
+        offlineTimeoutRef.current = setTimeout(() => {
+          handleOfflineUser();
+          offlineTimeoutRef.current = null;
+        }, 5000);
+      } else if (document.visibilityState === 'visible') {
+        // Cancel timeout jika user kembali visible
+        cancelOfflineTimeout();
       }
     };
 
@@ -223,13 +276,61 @@ const ControlArundaya = () => {
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // Cleanup timeout saat komponen unmount
+      cancelOfflineTimeout();
     };
-  }, [handleOfflineUser]);
+  }, [handleOfflineUser, cancelOfflineTimeout]);
 
   // Effect untuk inisialisasi komponen
   useEffect(() => {
     checkFinishArundaya();
   }, [checkFinishArundaya]);
+
+  // Effect untuk inisialisasi posisi dan status saat komponen mount
+  useEffect(() => {
+    const initializeUserStatus = async () => {
+      if (!user?.id || showoffline) return;
+      
+      try {
+        // Cek status ismove saat komponen mount
+        const ismoveRef = ref(database, `Users/${user.id}/ismove`);
+        const ismoveSnapshot = await get(ismoveRef);
+        const ismoveValue = ismoveSnapshot.val();
+        
+        // Jika status offline, pastikan posisi di-reset ke 0
+        if (ismoveValue === "offline") {
+          await Promise.all([
+            set(ref(database, `Users/${user.id}/moveX`), 0),
+            set(ref(database, `Users/${user.id}/moveY`), 0)
+          ]);
+        } else if (ismoveValue === null || ismoveValue === undefined) {
+          // Jika status belum ada, inisialisasi sebagai online dan reset posisi
+          await Promise.all([
+            set(ref(database, `Users/${user.id}/ismove`), "online"),
+            set(ref(database, `Users/${user.id}/moveX`), 0),
+            set(ref(database, `Users/${user.id}/moveY`), 0)
+          ]);
+        } else {
+          // Jika status online, pastikan posisi tidak null
+          const moveXRef = ref(database, `Users/${user.id}/moveX`);
+          const moveYRef = ref(database, `Users/${user.id}/moveY`);
+          const moveXSnapshot = await get(moveXRef);
+          const moveYSnapshot = await get(moveYRef);
+          
+          if (moveXSnapshot.val() === null || moveYSnapshot.val() === null) {
+            await Promise.all([
+              set(ref(database, `Users/${user.id}/moveX`), 0),
+              set(ref(database, `Users/${user.id}/moveY`), 0)
+            ]);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing user status:', error);
+      }
+    };
+
+    initializeUserStatus();
+  }, [user?.id, showoffline]);
 
   return (
     <div className="h-screen w-full flex flex-col items-center justify-between bg-primary-darker p-0">
