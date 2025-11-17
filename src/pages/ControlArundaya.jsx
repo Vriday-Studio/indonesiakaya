@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+﻿import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Joystick } from 'react-joystick-component';
 import { useAuth } from "../context/AuthProvider";
 import { ref, set, get } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from 'react-router-dom';
-import { getJumlahUserTamu, setJumlahUserTamu } from "../lib/firebase/movexy";
-import { setFinishArundaya, getFinishArundaya, getgameLutungPoint, setgameLutungPoint, setSkorLutungPoint } from "../lib/firebase/users";
+import { getJumlahUserTamu, setJumlahUserTamu, TamuTrue } from "../lib/firebase/movexy";
+import { setFinishArundaya, getFinishArundaya, getgameLutungPoint, setgameLutungPoint, setSkorLutungPoint, setOnlineArundaya } from "../lib/firebase/users";
 
 const ControlArundaya = () => {
   const { user } = useAuth();
@@ -15,6 +15,7 @@ const ControlArundaya = () => {
   const [showoffline, setShowoffline] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResettingCharacter, setIsResettingCharacter] = useState(false);
   
   // Refs untuk menghindari re-render yang tidak perlu
   const hasShownPopupRef = useRef(false);
@@ -238,6 +239,32 @@ const ControlArundaya = () => {
     resetGameScore();
   }, [resetGameScore]);
 
+  const handleResetCharacter = useCallback(async () => {
+    if (!user?.id) {
+      navigate("/login");
+      return;
+    }
+
+    cancelOfflineTimeout();
+    const cachedDataString = sessionStorage.getItem("arundayaDataString");
+
+    if (!cachedDataString) {
+      console.warn("Tidak ada data karakter tersimpan untuk direset.");
+      return;
+    }
+
+    setIsResettingCharacter(true);
+    try {
+      await TamuTrue(cachedDataString);
+      await setOnlineArundaya(user.id, true);
+      console.log("Karakter berhasil direset:", cachedDataString);
+    } catch (error) {
+      console.error("Error resetting character:", error);
+    } finally {
+      setIsResettingCharacter(false);
+    }
+  }, [user?.id, navigate, cancelOfflineTimeout]);
+
   // Fungsi untuk mengirim pesan chat
   const sendMessage = useCallback(async (message) => {
     if (!user?.id) return;
@@ -253,6 +280,20 @@ const ControlArundaya = () => {
       console.error('Error sending message:', error);
     }
   }, [user?.id, cancelOfflineTimeout]);
+
+  // Effect untuk menangani error eksternal (misalnya ekstensi browser)
+  useEffect(() => {
+    const handleUnhandledRejection = (event) => {
+      const message = event?.reason?.message;
+      if (typeof message === "string" && message.includes("Receiving end does not exist")) {
+        console.warn("Chrome runtime messaging is unavailable. Ignoring extension error.", event.reason);
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    return () => window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+  }, []);
 
   // Effect untuk handle visibility change
   useEffect(() => {
@@ -333,7 +374,7 @@ const ControlArundaya = () => {
   }, [user?.id, showoffline]);
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-between bg-primary-darker p-0">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-primary-darker p-4 pb-8 space-y-4">
         {showoffline ? (
             <div className="h-full w-full flex flex-col items-center justify-center bg-primary-darker">
                 <h1 className="text-2xl font-bold text-white mb-4 text-center">Anda telah <br></br> meninggalkan permainan</h1>
@@ -347,55 +388,77 @@ const ControlArundaya = () => {
             </div>
         ) : (
             <>
-                <div className="flex flex-col items-center w-full">
-                    <button id="homebutton"
-                        onClick={() => handleHome()}
-                        className="absolute top-4 left-4 z-30 w-15 h-15 bg-transparent border-none"
-                    >
-                        <img src="/images/back.png" alt="Back" className="w-full h-full object-contain" />
-                    </button>
+                <div className="flex flex-col items-center w-full max-w-sm gap-4">
                     <div className="relative w-full">
+                        <button
+                            id="homebutton"
+                            onClick={() => handleHome()}
+                            className="absolute -top-3 -left-3 z-30 w-12 h-12 bg-transparent border-none"
+                        >
+                            <img src="/images/back.png" alt="Back" className="w-full h-full object-contain" />
+                        </button>
+                        <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
                         <img 
                             src="/images/banner4.png" 
                             alt="Banner" 
-                            className="w-full h-auto object-cover"
+                                className="w-full h-32 object-cover"
                         />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black/30">
+                                <h1 className="text-2xl font-bold text-white mb-1 drop-shadow">Tamu Istana</h1>
+                                <p className="text-white text-base drop-shadow">Skor</p>
+                                <p id="score" className="text-white text-lg font-semibold drop-shadow">
+                                    {`${score}/60`}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="absolute -top-5 left-0 w-full h-[25%] flex flex-col items-center justify-center text-center">
-                        <h1 className="text-3xl font-bold text-white mb-2">Tamu Istana</h1>
-                        <h3 className="text-white text-xl mb-2">Skor: </h3>
-                        <h3 id="score" className="text-white text-xl">
-                          { `${score}/60`}
-                        </h3>
+                    <div className="flex justify-center w-full relative z-10">
+                        <button
+                            onClick={handleResetCharacter}
+                            disabled={isResettingCharacter}
+                            className="bg-blue-500 disabled:bg-blue-300 text-white px-4 py-2 rounded shadow w-full text-sm font-semibold"
+                        >
+                            {isResettingCharacter ? "Resetting..." : "Reset Character"}
+                        </button>
                     </div>
                 </div>
-                <h3 className="text-white text-xl mb-2">Chat: </h3>
-                <div className="flex flex-wrap justify-center text-center w-full mb-8 scrollable" style={{ maxHeight: '200px', padding: '0 10px', display: 'block' }}>
-                    {[
-                        "Hai!",
-                        "Kesana yuk!",
-                        "Terima kasih!",
-                        "Aku dapat!",
-                        "Ayo cari bersama!",
-                        "Mana lagi ya?",
-                        "Selamat datang!",
-                        "Semangat terus!",
-                        "Aku duluan!",
-                        "Sampai jumpa!"
-                    ].map((message, index) => (
-                        <button 
-                            key={index} 
-                            className="chat-button bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded m-2 w-1/2 transition-colors duration-200" 
-                            onClick={() => sendMessage(message)}
+                <div className="w-full max-w-sm">
+                    <h3 className="text-white text-lg mb-2">Chat:</h3>
+                    <div className="relative w-full rounded-lg bg-black/30 p-2">
+                        <div
+                            className="max-h-32 overflow-y-auto space-y-3"
+                            style={{
+                                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                                maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
+                            }}
                         >
-                            {message}
-                        </button>
-                    ))}
+                            {[
+                                "Hai!",
+                                "Kesana yuk!",
+                                "Terima kasih!",
+                                "Aku dapat!",
+                                "Ayo cari bersama!",
+                                "Mana lagi ya?",
+                                "Selamat datang!",
+                                "Semangat terus!",
+                                "Aku duluan!",
+                                "Sampai jumpa!"
+                            ].map((message, index) => (
+                                <button 
+                                    key={index} 
+                                    className="w-full chat-button bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded transition-colors duration-200 text-sm" 
+                                    onClick={() => sendMessage(message)}
+                                >
+                                    {message}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex justify-center w-full mb-8">
+                <div className="flex justify-center w-full mt-4">
                     <Joystick
-                        size={200}
+                        size={160}
                         sticky={false}
                         baseColor="white"
                         stickColor="grey"

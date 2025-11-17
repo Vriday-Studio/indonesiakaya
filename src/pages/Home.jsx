@@ -177,7 +177,7 @@ const Home = () => {
             </div
             >*/}
             <footer className="text-center text-xs text-primary-orange mt-4">
-                v.1.25.0825
+                v.1.25.1117
             </footer>
         </div>
     );

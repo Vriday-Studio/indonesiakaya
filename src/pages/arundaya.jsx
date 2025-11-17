@@ -179,11 +179,21 @@ const Arundaya = () => {
         userName = userName.split(" ")[0]; // Ambil bagian pertama sebelum spasi
        }
        const dataString = `true_${characterName}_${outfitIndex}_${userName}_${user.id}`; // Format string
+       try {
+           sessionStorage.setItem("arundayaDataString", dataString);
+       } catch (storageError) {
+           console.warn("Tidak dapat menyimpan data karakter ke sessionStorage:", storageError);
+       }
       
+       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
        // Kirim data ke Firebase
        try {
-           TamuTrue(dataString);
-           setOnlineArundaya(user.id,true);
+           await TamuTrue(dataString);
+           await setOnlineArundaya(user.id,true);
+           await delay(1000);
+           await TamuTrue(dataString);
+           await setOnlineArundaya(user.id,true);
+           await delay(1000);
         //    updatemoveUser(0,0);
            console.log("Data berhasil dikirim:", dataString);
        } catch (error) {
