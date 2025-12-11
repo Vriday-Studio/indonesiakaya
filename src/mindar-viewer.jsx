@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import "aframe";
-import "mind-ar/dist/mindar-image-aframe.prod.js";
+//import "aframe";
+//import "mind-ar/dist/mindar-image-aframe.prod.js";
 import useARManager from "./useARManager";
 import logoGaleri from "/images/logo-galeri-indonesia-kaya.png";
 import IconCollection from "/icons/icon-collection.png";
