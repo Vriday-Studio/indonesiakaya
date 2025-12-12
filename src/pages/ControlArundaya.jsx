@@ -138,11 +138,16 @@ const ControlArundaya = () => {
     try {
       setIsLoading(true);
 
+      // Read both `skor` and `gameLutungPoints`. Prefer `skor` when present
+      const skorRef = ref(database, `Users/${user.id}/skor`);
       const scoreRefG = ref(database, `Users/${user.id}/gameLutungPoints`);
-      const snapshotG = await get(scoreRefG);
-      const gameLutungPoints = snapshotG.val();
 
-      if (gameLutungPoints === null) {
+      const [snapshotSkor, snapshotG] = await Promise.all([get(skorRef), get(scoreRefG)]);
+      const skorVal = snapshotSkor.exists() ? snapshotSkor.val() : null;
+      const gameLutungPoints = snapshotG.exists() ? snapshotG.val() : null;
+
+      // If neither exists, initialize both to 0
+      if (skorVal === null && gameLutungPoints === null) {
         await Promise.all([
           setSkorLutungPoint(user.id, 0),
           setgameLutungPoint(user.id, 0),
@@ -151,18 +156,23 @@ const ControlArundaya = () => {
         return;
       }
 
-      const currentScore = Math.min(gameLutungPoints, 60);
+      // Prefer `skor` if present and numeric, otherwise use gameLutungPoints
+      const sourceValue = typeof skorVal === "number" ? skorVal : gameLutungPoints;
+      const currentScore = Math.min(Number(sourceValue) || 0, 60);
 
-      if (gameLutungPoints >= 60 && !hasShownPopupRef.current) {
+      // If underlying game points reach threshold, keep existing finish logic
+      const thresholdSource = gameLutungPoints || 0;
+      if (thresholdSource >= 60 && !hasShownPopupRef.current) {
         await setFinishArundaya(user.id, true);
         hasShownPopupRef.current = true;
         setHasShownPopup(true);
         setShowPopup(true);
       }
 
+      // Keep gameLutungPoints in sync with capped value
       await setgameLutungPoint(user.id, currentScore);
 
-      if (gameLutungPoints >= 60) {
+      if (thresholdSource >= 60) {
         await setSkorLutungPoint(user.id, 60);
       }
 
@@ -424,6 +434,21 @@ const ControlArundaya = () => {
   useEffect(() => {
     checkFinishArundaya();
   }, [checkFinishArundaya]);
+
+  // Reset `skor` to 0 when loading the controller page
+  useEffect(() => {
+    const resetSkorOnLoad = async () => {
+      if (!user?.id) return;
+      try {
+        await setSkorLutungPoint(user.id, 0);
+        setScore(0);
+      } catch (error) {
+        console.error("Error resetting skor on load:", error);
+      }
+    };
+
+    resetSkorOnLoad();
+  }, [user?.id]);
 
   useEffect(() => {
     const initializeUserStatus = async () => {

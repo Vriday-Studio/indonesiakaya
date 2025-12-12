@@ -10,6 +10,18 @@ import LoadingScreen from "../components/LoadingScreen";
 import { getCanClaim } from "../lib/firebase/quiz";
 const Home = () => {
     const { user, logoutUser } = useAuth();
+    // Reload once per new browser tab to pick up updated web version
+    React.useEffect(() => {
+        try {
+            const reloadKey = "home_reloaded_v1";
+            if (!sessionStorage.getItem(reloadKey)) {
+                sessionStorage.setItem(reloadKey, "1");
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Error during initial reload check:", error);
+        }
+    }, []);
     const [isLoading, setIsLoading] = React.useState(true);
     const [selectedContent, setSelectedContent] = React.useState(null);
     const [countFromTotal, setCountFromTotal] = React.useState("");
@@ -177,7 +189,7 @@ const Home = () => {
             </div
             >*/}
             <footer className="text-center text-xs text-primary-orange mt-4">
-                v.1.25.1117
+                v.1.25.1212
             </footer>
         </div>
     );
