@@ -20,9 +20,8 @@ import {
 
 import { io } from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL?.trim() ||
-  "https://arundaya-socket-server2-production.up.railway.app";
+// Socket URL will be resolved at runtime from Firebase `count/socketurl`,
+// falling back to env or a hardcoded default.
 
 const ControlArundaya = () => {
   const { user } = useAuth();
@@ -50,51 +49,67 @@ const ControlArundaya = () => {
   useEffect(() => {
     if (!user?.id) return;
 
-  const socket = io(SOCKET_URL, {
-  // biarkan Socket.IO nego sendiri: polling -> websocket
-  transports: ["websocket", "polling"],
-  secure: true,
-  reconnection: true,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-  reconnectionAttempts: Infinity,
-});
+    let currentSocket = null;
 
+    const initSocket = async () => {
+      try {
+        const snap = await get(ref(database, "count/socketurl"));
+        console.log("Fetched socket URL from DB:", snap.val());
+        const dbUrl = snap && snap.exists() ? (snap.val() || "").trim() : "";
+        const envUrl = import.meta.env.VITE_SOCKET_URL?.trim();
+        const finalUrl = dbUrl || envUrl || "https://arundaya-socket-server2-production.up.railway.app";
 
+        const socket = io(finalUrl, {
+          // biarkan Socket.IO nego sendiri: polling -> websocket
+          transports: ["websocket", "polling"],
+          secure: true,
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: Infinity,
+        });
 
-    socketRef.current = socket;
+        currentSocket = socket;
+        socketRef.current = socket;
 
-    socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
-      setSocketConnected(true);
+        socket.on("connect", () => {
+          console.log("✅ Socket connected:", socket.id, "url:", finalUrl);
+          setSocketConnected(true);
 
-      // Register controller
-      socket.emit("join-controller", { userId: user.id });
-      console.log("📤 Emitted join-controller for user:", user.id);
+          // Register controller
+          socket.emit("join-controller", { userId: user.id });
+          console.log("📤 Emitted join-controller for user:", user.id);
 
-      socket.emit("controller-status", {
-        userId: user.id,
-        status: "online",
-      });
+          socket.emit("controller-status", {
+            userId: user.id,
+            status: "online",
+          });
 
-      // Initialize position
-      socket.emit("joystick-move", { userId: user.id, x: 0, y: 0 });
-      console.log("📤 Initial position sent: x=0, y=0");
-    });
+          // Initialize position
+          socket.emit("joystick-move", { userId: user.id, x: 0, y: 0 });
+          console.log("📤 Initial position sent: x=0, y=0");
+        });
 
-    socket.on("connect_error", (error) => {
-      console.error("❌ Socket connection error:", error);
-      setSocketConnected(false);
-    });
+        socket.on("connect_error", (error) => {
+          console.error("❌ Socket connection error:", error);
+          setSocketConnected(false);
+        });
 
-    socket.on("disconnect", (reason) => {
-      console.warn("⚠️ Socket disconnected. Reason:", reason);
-      setSocketConnected(false);
-    });
+        socket.on("disconnect", (reason) => {
+          console.warn("⚠️ Socket disconnected. Reason:", reason);
+          setSocketConnected(false);
+        });
+      } catch (error) {
+        console.error("Error initializing socket:", error);
+        setSocketConnected(false);
+      }
+    };
+
+    initSocket();
 
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (currentSocket) {
+        currentSocket.disconnect();
         socketRef.current = null;
       }
     };
