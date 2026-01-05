@@ -5,7 +5,7 @@ import { VitePWA } from "vite-plugin-pwa";
 const manifestForPlugIn = {
     registerType: "autoUpdate", // SW otomatis update
     workbox: {
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
             {
                 urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/,
@@ -69,5 +69,5 @@ export default defineConfig({
         port: 4173,
         strictPort: true,
         host: '127.0.0.1',
-    }, 
+    },
 });

@@ -17,11 +17,9 @@ import ContentSetting from "./pages/dashboard/ContentSetting";
 import Users from "./pages/dashboard/Users";
 import UsersForm from "./pages/dashboard/UsersForm";
 import Home from "./pages/Home";
-import Home2 from "./pages/Home2";
 import DetailImage from "./pages/DetailImage";
 import Quiz from "./pages/dashboard/Quiz";
 import Collection from "./pages/Collection";
-import StartAR from "./pages/StartAR";
 import About from "./pages/About";
 import Guide from "./pages/Guide";
 import ArtworkListUser from "./pages/dashboard/ArtworkListUser";
@@ -36,16 +34,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Claim from "./pages/Claim";
 import LoadingScreen from "./components/LoadingScreen";
 import Report from "./pages/dashboard/Report";
-import Joystix from "./pages/Joystix";
-import Aboutcerita from "./pages/Aboutcerita";
-import StoryDetail from "./pages/StoryDetail";
-import MiniQuiz from "./pages/MiniQuiz";
-import QRScanner from "./pages/QRScanner";
-import Arundaya from "./pages/arundaya";
-import ControlArundaya from "./pages/ControlArundaya";
-import StorynoGame from "./pages/StorynoGame";
-import MiniQuixx from "./pages/MiniQuixx";
-import AdminPage from "./pages/AdminPage";
+
 function App() {
     const [isLandscape, setIsLandscape] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -122,21 +111,10 @@ function App() {
                 <Route path="/guide" element={<Guide />} />
                 <Route path="/claim" element={<Claim />} />
                 <Route path="/collection" element={<Collection />} />
-                <Route path="/detail" element={<DetailImage />} />
+                <Route path="/collection/:id" element={<DetailImage />} />
                 <Route path="/collection/:id/quiz" element={<QuizCarousel />} />
                 <Route path="/profile" element={<ProfileForm />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/joystix" element={<Joystix />} />
-                <Route path="/Home2" element={<Home2 />} />
-                <Route path="/Aboutcerita" element={<Aboutcerita />} />
-                <Route path="/story-detail/:cerita" element={<StoryDetail />} />
-                <Route path="/mini-quiz" element={<MiniQuiz />} />
-                <Route path="/mini-quiz/:quizType" element={<MiniQuiz />} />
-                <Route path="/mini-quixx" element={<MiniQuixx />} />
-                <Route path="/mini-quixx/:quizType" element={<MiniQuixx />} />
-                <Route path="/control-arundaya" element={<ControlArundaya />} />
-                <Route path="/storynogame/:cerita" element={<StorynoGame />} />
-                <Route path="/adminpage" element={<AdminPage />} />
             </Route>
             <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -156,8 +134,6 @@ function App() {
                 <Route path="/dashboard/report/" element={<Report />} />
 
             </Route>
-            <Route path="/start" element={<QRScanner />} />
-            <Route path="/arundaya" element={<Arundaya />} />
         </Routes>
     );
 }

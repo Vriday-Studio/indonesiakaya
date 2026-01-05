@@ -31,7 +31,7 @@ const About = () => {
     return (
         <div>
             <BackIcon />
-            <div className="w-full text-left">
+            <div className="w-full">
                 <Carousel autoSlide hideNavigation>
                     {[
                         ...selectedContent.images.map((s) => (
@@ -40,19 +40,12 @@ const About = () => {
                     ]}
                 </Carousel>
             </div>
-            <div className="text-primary-orange flex text-left flex-col gap-2 px-10 py-5">
-                <h1 className="text-xl text-left font-bold pb-2">{selectedContent.title}</h1>
+            <div className="text-primary-orange flex justify-center items-center flex-col gap-2 px-10 py-5">
+                <h1 className="text-xl font-bold pb-2">{selectedContent.title}</h1>
                 <div
-                    className="text-lg border-t-2 font-light  border-primary-orange py-5 text-left"
-                >
-                    Galeri Indonesia Kaya merupakan ruang edutainment budaya persembahan Bakti Budaya Djarum Foundation yang berbasis teknologi digital dari Indonesia untuk Indonesia yang menyuguhkan informasi kekayaan budaya nusantara. Mulai dari alat musik tradisional, mainan tradisional, baju adat, sampai informasi tentang kuliner, pariwisata, tradisi dan kesenian dikemas secara digital dan interaktif di tempat pertunjukan ini.
-
-Terletak di Grand Indonesia, Galeri Indonesia Kaya menawarkan alternatif dalam mempelajari tradisi budaya Indonesia dengan cara yang lebih modern, menyenangkan, mudah dan gratis.<br></br><br></br>
-
-Galeri Indonesia Kaya dilengkapi dengan auditorium berkapasitas 150 orang sebagai ruang seni pertunjukan yang menyuguhkan tontonan budaya, mulai dari seni panggung teater, musik, pemutaran film, nonton teater, pertunjukan musikal, diskusi budaya, seminar dan workshop secara gratis. Para seniman yang ingin memakai auditorium dapat menggunakannya sebagai gedung pertunjukan atau tempat pertunjukan tanpa dipungut biaya.
-
-Galeri Indonesia Kaya sebagai pentas budaya juga menyuguhkan berbagai macam pertunjukan budaya dari seniman-seniman Indonesia, baik mereka yang baru berkiprah atau mereka yang telah lama berkecimpung dalam dunia seni, tiap akhir pekan.
-                </div>
+                    className="text-xs border-t-2 font-light text-center border-primary-orange py-5 tracking-wide leading-5 unreset"
+                    dangerouslySetInnerHTML={{ __html: sanitizeDOM(selectedContent.description) }}
+                ></div>
             </div>
         </div>
     );

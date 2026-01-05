@@ -1,7 +1,7 @@
 {
     "hosting": [
         {
-            "site": "empatraja",
+            "site": "fubuki-ar-test",
             "public": "dist",
             "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
             "rewrites": [
@@ -12,7 +12,7 @@
             ]
         },
         {
-            "site": "empatraja",
+            "site": "indonesiakaya",
             "public": "dist",
             "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
             "rewrites": [

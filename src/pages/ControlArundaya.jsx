@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Joystick } from "react-joystick-component";
 import { useAuth } from "../context/AuthProvider";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, remove, update } from "firebase/database";
 import { database } from "../lib/firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,11 +18,6 @@ import {
   setOnlineArundaya,
 } from "../lib/firebase/users";
 
-import { io } from "socket.io-client";
-
-// Socket URL will be resolved at runtime from Firebase `count/socketurl`,
-// falling back to env or a hardcoded default.
-
 const ControlArundaya = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -33,87 +28,11 @@ const ControlArundaya = () => {
   const [hasShownPopup, setHasShownPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingCharacter, setIsResettingCharacter] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(false);
 
   // Refs
   const hasShownPopupRef = useRef(false);
   const intervalRef = useRef(null);
   const offlineTimeoutRef = useRef(null);
-  const socketRef = useRef(null);
-  const lastMoveRef = useRef({ x: 0, y: 0 });
-  const moveThrottleRef = useRef(null);
-
-  // ===========================
-  // INIT SOCKET.IO PER PLAYER
-  // ===========================
-  useEffect(() => {
-    if (!user?.id) return;
-
-    let currentSocket = null;
-
-    const initSocket = async () => {
-      try {
-        const snap = await get(ref(database, "count/socketurl"));
-        console.log("Fetched socket URL from DB:", snap.val());
-        const dbUrl = snap && snap.exists() ? (snap.val() || "").trim() : "";
-        const envUrl = import.meta.env.VITE_SOCKET_URL?.trim();
-        const finalUrl = dbUrl || envUrl || "https://arundaya-socket-server2-production.up.railway.app";
-
-        const socket = io(finalUrl, {
-          // biarkan Socket.IO nego sendiri: polling -> websocket
-          transports: ["websocket", "polling"],
-          secure: true,
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: Infinity,
-        });
-
-        currentSocket = socket;
-        socketRef.current = socket;
-
-        socket.on("connect", () => {
-          console.log("✅ Socket connected:", socket.id, "url:", finalUrl);
-          setSocketConnected(true);
-
-          // Register controller
-          socket.emit("join-controller", { userId: user.id });
-          console.log("📤 Emitted join-controller for user:", user.id);
-
-          socket.emit("controller-status", {
-            userId: user.id,
-            status: "online",
-          });
-
-          // Initialize position
-          socket.emit("joystick-move", { userId: user.id, x: 0, y: 0 });
-          console.log("📤 Initial position sent: x=0, y=0");
-        });
-
-        socket.on("connect_error", (error) => {
-          console.error("❌ Socket connection error:", error);
-          setSocketConnected(false);
-        });
-
-        socket.on("disconnect", (reason) => {
-          console.warn("⚠️ Socket disconnected. Reason:", reason);
-          setSocketConnected(false);
-        });
-      } catch (error) {
-        console.error("Error initializing socket:", error);
-        setSocketConnected(false);
-      }
-    };
-
-    initSocket();
-
-    return () => {
-      if (currentSocket) {
-        currentSocket.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [user?.id]);
 
   // =====================
   // FINISH & SCORE LOGIC
@@ -213,51 +132,34 @@ const ControlArundaya = () => {
   }, [user?.id, getScore]);
 
   // ============================
-  // MOVEMENT VIA SOCKET.IO
+  // MOVEMENT VIA FIREBASE
   // ============================
   const updateMoveUser = useCallback(
     (x, y) => {
-      if (!user?.id || showoffline || !socketConnected) {
+      if (!user?.id || showoffline) {
         console.warn(
           "❌ Cannot move. User:",
           user?.id,
           "Offline:",
-          showoffline,
-          "Connected:",
-          socketConnected
+          showoffline
         );
         return;
       }
 
-      // Throttle movement to avoid spam
-      if (moveThrottleRef.current) {
-        clearTimeout(moveThrottleRef.current);
-      }
-
-      const socket = socketRef.current;
-      if (!socket || !socket.connected) {
-        console.warn("❌ Socket not connected");
-        return;
-      }
-
-      // Only emit if position changed
-      if (lastMoveRef.current.x !== x || lastMoveRef.current.y !== y) {
-        lastMoveRef.current = { x, y };
-
-        console.log("📤 Joystick move emitted:", { userId: user.id, x, y });
-        socket.emit("joystick-move", {
-          userId: user.id,
-          x,
-          y,
+      try {
+        const dbUserRef = ref(database, `Users/${user.id}`);
+        update(dbUserRef, {
+          ismove: "true",
+          moveX: -x,
+          moveY: -y,
+          isMessage: "false",
         });
-
-        // Throttle to prevent excessive emissions
-        moveThrottleRef.current = setTimeout(() => {
-          moveThrottleRef.current = null;
-        }, 50);
+        console.log("📤 Joystick move updated:", { userId: user.id, x: -x, y: -y });
+      } catch (error) {
+        console.error("Error updating user movement:", error);
       }
     },
-    [user?.id, showoffline, socketConnected]
+    [user?.id, showoffline]
   );
 
   const cancelOfflineTimeout = useCallback(() => {
@@ -271,33 +173,20 @@ const ControlArundaya = () => {
     async (status) => {
       if (!user?.id) return;
 
-      const socket = socketRef.current;
-      if (socket && socket.connected) {
-        console.log("📤 Controller status emitted:", { userId: user.id, status });
-        socket.emit("controller-status", {
-          userId: user.id,
-          status,
-        });
-
+      try {
+        const dbUserRef = ref(database, `Users/${user.id}`);
         if (status === "offline") {
-          socket.emit("joystick-move", {
-            userId: user.id,
-            x: 0,
-            y: 0,
+          await update(dbUserRef, {
+            ismove: status,
+            moveX: 0,
+            moveY: 0,
+          });
+        } else {
+          await update(dbUserRef, {
+            ismove: status,
           });
         }
-      }
-
-      try {
-        if (status === "offline") {
-          await Promise.all([
-            set(ref(database, `Users/${user.id}/ismove`), status),
-            set(ref(database, `Users/${user.id}/moveX`), 0),
-            set(ref(database, `Users/${user.id}/moveY`), 0),
-          ]);
-        } else {
-          await set(ref(database, `Users/${user.id}/ismove`), status);
-        }
+        console.log("📤 User move status updated:", { userId: user.id, status });
       } catch (error) {
         console.error("Error updating user move status:", error);
       }
@@ -335,14 +224,26 @@ const ControlArundaya = () => {
   const handleStop = useCallback(() => {
     console.log("🛑 Joystick stopped");
     cancelOfflineTimeout();
-    updateMoveUser(0, 0);
-  }, [updateMoveUser, cancelOfflineTimeout]);
+    if (!user?.id) return;
+    
+    try {
+      const dbUserRef = ref(database, `Users/${user.id}`);
+      update(dbUserRef, {
+        ismove: "false",
+        moveX: 0,
+        moveY: 0,
+      });
+      console.log("📤 Joystick stopped - position reset");
+    } catch (error) {
+      console.error("Error stopping joystick:", error);
+    }
+  }, [user?.id, cancelOfflineTimeout]);
 
   const handleHome = useCallback(() => {
     cancelOfflineTimeout();
     updateMoveUser(0, 0);
     updateIsMoveUser("offline");
-    navigate("/arundaya");
+    navigate("/");
   }, [updateMoveUser, updateIsMoveUser, navigate, cancelOfflineTimeout]);
 
   const handleContinuePlaying = useCallback(() => {
@@ -382,20 +283,14 @@ const ControlArundaya = () => {
 
       cancelOfflineTimeout();
 
-      const socket = socketRef.current;
-      if (socket && socket.connected) {
-        console.log("💬 Message emitted:", { userId: user.id, message });
-        socket.emit("controller-chat", {
-          userId: user.id,
-          message,
-        });
-      }
-
       try {
-        await Promise.all([
-          set(ref(database, `Users/${user.id}/message`), message),
-          set(ref(database, `Users/${user.id}/ismessage`), true),
-        ]);
+        const dbUserRef = ref(database, `Users/${user.id}`);
+        const messageWithPrefix = "chat_" + message;
+        await update(dbUserRef, {
+          message: messageWithPrefix,
+          ismessage: true,
+        });
+        console.log("💬 Message sent:", { userId: user.id, message: messageWithPrefix });
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -449,6 +344,26 @@ const ControlArundaya = () => {
   useEffect(() => {
     checkFinishArundaya();
   }, [checkFinishArundaya]);
+
+  // Register this user into Antrian on first load, remove on unmount
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const registerAntrian = async () => {
+      try {
+        const antrianRef = ref(database, `Antrian`);
+        const display = user.displayName || user.name || user.id;
+        await set(antrianRef, "nonewplayer "+display);
+        console.log("✅ Registered in Antrian:", user.id, display);
+      } catch (error) {
+        console.error("Error registering Antrian:", error);
+      }
+    };
+
+    registerAntrian();
+
+    
+  }, [user?.id]);
 
   // Reset `skor` to 0 when loading the controller page
   useEffect(() => {
@@ -538,7 +453,7 @@ const ControlArundaya = () => {
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black/30">
                   <h1 className="text-2xl font-bold text-white mb-1 drop-shadow">
-                    Tamu Istana
+                    Arundaya
                   </h1>
                   <p className="text-white text-base drop-shadow">Skor</p>
                   <p

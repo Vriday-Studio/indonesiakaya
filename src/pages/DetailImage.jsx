@@ -27,7 +27,7 @@ const DetailImage = ({ isModal, artworkId }) => {
     const handleNavigateToQuiz = () => {
         navigate(`/collection/${detail.id}/quiz`);
     };
-    /*
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -52,12 +52,11 @@ const DetailImage = ({ isModal, artworkId }) => {
             <LoadingScreen />
         );
     }
-    */
 
     const isAdded = detail && detail.users && detail.users[user.id];
     const isQuizAvailable = detail && detail.quiz;
     const isLimited = userQuizAttempt >= 2 || userPoint === detail.quiz?.totalPoint;
-    
+
     return (
         <div className={`${isModal ? "" : "min-h-screen"} bg-white`}>
             {!isModal && <BackIcon iconColor="white" url={`${from === "scan" ? "/start" : ""}`} className="absolute left-2 top-2 z-20" />}

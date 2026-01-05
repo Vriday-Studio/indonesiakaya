@@ -10,18 +10,6 @@ import LoadingScreen from "../components/LoadingScreen";
 import { getCanClaim } from "../lib/firebase/quiz";
 const Home = () => {
     const { user, logoutUser } = useAuth();
-    // Reload once per new browser tab to pick up updated web version
-    React.useEffect(() => {
-        try {
-            const reloadKey = "home_reloaded_v1";
-            if (!sessionStorage.getItem(reloadKey)) {
-                sessionStorage.setItem(reloadKey, "1");
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error("Error during initial reload check:", error);
-        }
-    }, []);
     const [isLoading, setIsLoading] = React.useState(true);
     const [selectedContent, setSelectedContent] = React.useState(null);
     const [countFromTotal, setCountFromTotal] = React.useState("");
@@ -29,10 +17,9 @@ const Home = () => {
     const [canClaim, setCanClaim] = React.useState(false);
 
     const hasCompletedTutorial = sessionStorage.getItem("hasCompletedTutorial");
-    const redirectUserUrl = hasCompletedTutorial ? "/start" : "/guide";
-
+    // redirectUserUrl = hasCompletedTutorial ? "/start" : "/guide";
+ const redirectUserUrl = "/control-arundaya";
     const getUserPoint = async () => {
-      //  console.log("userid="+user.id);
         const point = await getSelectedUserPoints(user.id);
         setUserPoint(point);
     };
@@ -86,31 +73,20 @@ const Home = () => {
             </div>
             <div className="relative w-full h-2/5">
                 <Carousel autoSlide animationType="fade" hideNavigation hidePagination>
-                    {[
-                        "/images/car1.png",
-                        "/images/car2.png",
-                        "/images/car3.png",
-                        "/images/car4.png",
-                        "/images/car5.png"
-                    ].map((s) => <img key={s} src={s} className="w-full flex-shrink-0 h-full object-cover" />)}
+                    {[...selectedContent.images.map((s) => <img key={s} src={s} className="w-full flex-shrink-0 h-full object-cover" />)]}
                 </Carousel>
-                <div className="absolute top-1 bg-gradient-to-t from-primary-darker w-full h-full z-10"></div>
+                <div className="absolute top-0 bg-gradient-to-t from-primary-darker w-full h-full z-10"></div>
             </div>
             <div className="relative h-full text-primary-brass flex flex-col items-center gap-2 -mt-10 z-50">
                 <p className="text-xs tracking-widest">
                     JELAJAH K<span className="text-sm">AR</span>YA
                 </p>
-                <h1 className="text-3xl font-bold text-left">CERITA RAKYAT</h1>
-                <div className="grid grid-cols-2 gap-2 mx-10 mt-3">
-                    <Link
-                        to="/Aboutcerita"
-                        className="border border-soft-cream bg-primary-darker text-soft-cream rounded-xl text-left content-center px-5 py-2 text-xs"
-                    >
-                        Tentang <br /> Cerita Rakyat
-                    </Link>
+                <h1 className="text-3xl font-bold">Arundaya</h1>
+                <div className="grid grid-cols-1 gap-2 mx-10 mt-3">
+                    
                     <Link
                         to="/about/galeri-indonesia-kaya"
-                        className="border border-soft-cream bg-primary-darker text-soft-cream rounded-xl text-left content-center px-5 py-2 text-xs"
+                        className="border border-soft-cream bg-primary-darker text-soft-cream rounded-xl text-center content-center px-5 py-2 text-xs"
                     >
                         Tentang <br /> Galeri Indonesia Kaya
                     </Link>
@@ -139,21 +115,20 @@ const Home = () => {
                             />
                         </svg>
 
-                        <p className="text-xl">Mulai Jelajahi Cerita</p>
+                        <p className="text-xl">Mulai Permainan</p>
                     </Link>
                     <div className="col-span-2 border border-soft-cream bg-primary-darker text-soft-cream rounded-xl text-center p-4 text-xs flex flex-col items-center">
                         {user ? (
                             <>
-                                <p className="text-wrap">Halo, {user.Nama}</p>
-                              
+                                <p className="text-nowrap">Halo, {user.Nama}</p>
                                 <div className="flex gap-5">
                                     <button onClick={logoutUser} className="w-full my-2 underline underline-offset-4 text-nowrap w-webkit-max-content">
                                         Logout
                                     </button>
                                 </div>
-                                <p className="text-xs">Id: [ {user.id} ]</p>
-                                <Link id="pointx" to="/profile" className="text-xs pb-2 mt-2 w-3/4 text-center">
-                                    Poin: {userPoint}
+
+                                <Link to="/collection" className="text-xs pb-2 mt-2 w-3/4 text-center">
+                                    Galeri: {countFromTotal} | Poin: {userPoint || 0}
                                 </Link>
                                 <Link to="/profile" className="bg-primary-orange text-white rounded-xl mt-4 p-2 w-3/4">
                                     {!user.Gender ? "Lengkapi Profile +80 poin" : "Lihat Profil"}
@@ -172,25 +147,6 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            {/* Tombol ke dua cerita di bawah 
-            <div className="fixed bottom-0 left-0 right-0 flex gap-4 justify-center bg-white py-4 z-50 border-t border-gray-200">
-                <Link
-                    to="/story-detail/lutung"
-                    className="bg-primary-orange text-white font-bold rounded-xl px-6 py-3 shadow-md text-lg"
-                >
-                    Baca Lutung Kasarung
-                </Link>
-                <Link
-                    to="/story-detail/empat-raja"
-                    className="bg-primary-orange text-white font-bold rounded-xl px-6 py-3 shadow-md text-lg"
-                >
-                    Baca Empat Raja
-                </Link>
-            </div
-            >*/}
-            <footer className="text-center text-xs text-primary-orange mt-4">
-                v.1.25.1230
-            </footer>
         </div>
     );
 };
