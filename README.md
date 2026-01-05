@@ -7,4 +7,4 @@ This APP is for AR Image Tracking
 
 ## Firebase env vars
 - Required keys are listed in `.env.example`; copy it to `.env.local` for local dev.
-- Netlify deployments read the same values from `netlify.toml` (`VITE_FIREBASE_*`). If you rotate Firebase keys, update both `.env.example` and `netlify.toml` to keep builds healthy.
+- Do **not** commit real keys. In Netlify, set `VITE_FIREBASE_*` in Site settings → Build & deploy → Environment. (Firebase web API keys are public by design, but keeping them out of the repo avoids secret-scanner noise.)
