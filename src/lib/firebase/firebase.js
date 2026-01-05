@@ -15,6 +15,19 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+// Fail fast with a clearer message when required env vars are missing
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([key, value]) => key !== "measurementId" && !value)
+  .map(([key]) => key);
+
+if (missingKeys.length) {
+  const formattedKeys = missingKeys.join(", ");
+  throw new Error(
+    `Firebase config is incomplete. Missing: ${formattedKeys}. ` +
+      `Ensure VITE_FIREBASE_* environment variables are set (Netlify: Site settings -> Build & deploy -> Environment).`
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
